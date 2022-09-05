@@ -33,6 +33,7 @@ from airflow import DAG
 
 # Operators; we need this to operate!
 from airflow.operators.python import PythonOperator
+from datetime import datetime, timedelta
 
 # [END import_module]
 
@@ -45,7 +46,7 @@ with DAG(
         default_args={'retries': 2},
         # [END default_args]
         description='ETL DAG tutorial',
-        schedule_interval=None,
+        schedule_interval=timedelta(seconds=5),
         start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
         catchup=False,
         tags=['example'],

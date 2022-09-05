@@ -2,6 +2,6 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/airflow-study/download_table.py" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/airflow-study/test_hook.py" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/airflow-study/etl_test.py" dialect="GenericSQL" />
   </component>
 </project>
