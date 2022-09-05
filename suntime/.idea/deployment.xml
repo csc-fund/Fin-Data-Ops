@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="zxjt@192.168.100.120:22">
+    <serverData>
+      <paths name="zxjt@192.168.100.120:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Z/qtData/suntime_db2txt" local="D:/SSH/suntime" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zxjt@192.168.100.120:22 (1)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Z/qtData/suntime_db2txt" local="D:/SSH/suntime" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zxjt@192.168.100.120:22 (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Z/qtData/suntime_db2txt" local="D:/SSH/suntime" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zxjt@192.168.100.120:22 (3)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Z/qtData/suntime_db2txt" local="D:/SSH/suntime" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
