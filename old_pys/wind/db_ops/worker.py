@@ -103,3 +103,5 @@ class Worker:
     def rec_size(self, pth, end_dt, rec_type):
         with open(os.path.join(LOGGER_ROOT, f"{end_dt}_size_rec.log"), "a") as f:
             print(rec_type, pth, os.path.getsize(pth), file=f, sep=",")
+
+

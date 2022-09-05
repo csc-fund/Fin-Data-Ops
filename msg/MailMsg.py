@@ -4,6 +4,7 @@
 # @Time      :2022/9/5 14:24
 # @Author    :Colin
 # @Note      :None
+
 import smtplib
 from email.mime.text import MIMEText
 from setting import *
