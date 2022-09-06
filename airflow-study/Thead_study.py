@@ -26,6 +26,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         url = future_to_url[future]  # 执行的表名
         try:
             res = future.result()  # 线程执行的结果 ,没有返回就是None
+            print(future)
         except Exception as exc:
             # 异常执行
             print('%r generated an exception: %s' % (url, exc))
