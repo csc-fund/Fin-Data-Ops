@@ -32,8 +32,9 @@
 # airflow tasks list download_table  --tree
 # The DAG object; we'll need this to instantiate a DAG
 
-# airflow tasks list download_table  --tree
-# airflow tasks test download_table select
+# airflow tasks list taskflow_api_etl  --tree
+# airflow tasks test taskflow_api_etl extract
+# taskflow_api_etl
 
 from airflow import DAG
 
