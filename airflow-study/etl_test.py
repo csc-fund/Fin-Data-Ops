@@ -24,30 +24,28 @@ from datetime import datetime, timedelta
 )
 # 定义ETL任务,包含了3个子任务
 def taskflow_api_etl():
-    @task  # 定义子任务:提取
+    @task  # 定义子任务:提取-> 从数据库按照日期提取需要的表
     def extract() -> pd.DataFrame:
         sql_hook = MySqlHook(mysql_conn_id='airflow_db')  # 数据库连接
-        query_sql = 'select * from stock_prices_stage'  # sql查询
-        df_extract = sql_hook.get_pandas_df(query_sql)  # 转为df格式返回
-        # df_extract.to_csv('test1.csv')
+        # -----------------sql查询----------------- #
+        query_sql = 'SELECT * FROM `{table_name}`'.format(table_name='ab_user')
+        df_extract = sql_hook.get_pandas_df(query_sql)  # 直接从Airflow的接口返回df格式
         return df_extract  # 传递到下一个子任务
 
-    @task  # 定义子任务:变换
+    @task  # 定义子任务:变换 -> 对DataFrame进行格式转换
     def transform(df_extract: pd.DataFrame):
-        df_transform = df_extract  # 数据转换
-        df_transform.to_csv('test2.csv')
+        df_transform = df_extract.fillna(0)  # 数据转换
         return df_transform  # 传递到下一个子任务
 
-    @task  # 定义子任务:加载
+    @task  # 定义子任务: 加载-> 下载feather格式到文件系统
     def load(df_transform: pd.DataFrame):
-        df_transform.to_csv('test3.csv')
+        df_transform.to_feather('load.f')  # 储存文件
 
-    # [START main_flow]
+    # [START main_flow]  API2.0本身会根据任务流自动生成依赖项,因此不需要定义依赖
     task1 = extract()
     task2 = transform(task1)
     load(task2)
-    # task1 >> task2 >> task3
-
+    # task1 >> task2
     # [END main_flow]
 
 
