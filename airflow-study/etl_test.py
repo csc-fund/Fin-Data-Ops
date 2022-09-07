@@ -22,7 +22,7 @@ def task_failure_alert(context):
     from msg.MailMsg import MailMsg
     with MailMsg() as msg:
         msg.send_msg('任务失败',
-                     f"Task has failed, task_instance_key_str: {context['task_instance_key_str']}")
+                     f"任务失败了!, 失败任务ID是: {context['task_instance_key_str']}")
 
 
 # 定义成功提醒 放在任务流的末尾,所有任务流成功即DAG成功
