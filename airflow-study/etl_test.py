@@ -42,7 +42,6 @@ def taskflow_api_etl():
     def load_feather(df_transform: pd.DataFrame):
         df_transform.to_feather('load.f')  # 储存文件
         df_transform.to_csv('load.csv')  # 储存文件
-        # return True
 
     @task  # 通信-> 异常告警
     def send_msg(sub: str = '无主题', content: str = '无内容'):
@@ -57,9 +56,9 @@ def taskflow_api_etl():
                         format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'  # 日志格式
                         )
 
-    # 多进程异步执行etl
+    # 多进程异步执行
     append_tables = ['ab_user', 'ab_user', 'ab_user', 'ab_user']  # 需要下载的表名
-    with ThreadPoolExecutor(max_workers=3) as executor:  # load(transform(extract(table)))
+    with ThreadPoolExecutor(max_workers=3) as executor:
         tasks = {executor.submit(load_feather, transform_df(extract_sql(table))): table for table in
                  append_tables}  # 返回每个线程的执行结果,submit()中填写函数和形参,让所有进程异步执行任务
         for future in as_completed(tasks):  # 完成select_table以后,遍历每个进程的执行情况
@@ -74,6 +73,7 @@ def taskflow_api_etl():
             # 结果正常处理
             else:
                 logging.info('%s table res %s ' % (table, res))
+                send_msg(table, str(res))
     # [END main_flow]
 
 
