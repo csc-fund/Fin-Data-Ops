@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# @FileName  :merge_table.py
+# @Time      :2022/9/7 15:16
+# @Author    :Colin
+# @Note      :None
+
 import pendulum
 from airflow.decorators import dag, task
 # -----------------airflow数据库接口----------------- #
@@ -12,7 +19,7 @@ import logging
 # 配置本地日志信息
 logging.basicConfig(level=logging.DEBUG,  # 控制台打印的日志级别
                     filename='new.log',
-                    filemode='a',  # 模式，有w和a，w就是写模式，每次都会重新写日志，覆盖之前的日志, a是追加模式，默认如果不写的话，就是追加模式
+                    filemode='a',  # 模式，有w和a，w就是写模式，a是追加模式，
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'  # 日志格式
                     )
 
@@ -54,7 +61,7 @@ def csc_database_etl():
         df_transform = df_extract.fillna(0)  # 数据转换
         return df_transform  # 传递到下一个子任务
 
-    @task(on_success_callback=dag_success_alert)  # 加载-> 下载feather格式到文件系统
+    @task(on_success_callback=dag_success_alert, on_failure_callback=task_failure_alert)  # 加载-> 下载feather格式到文件系统
     def load_feather(df_transform: pd.DataFrame):
         df_transform.to_csv('load.csv')  # 储存文件
 
