@@ -58,10 +58,10 @@ def taskflow_api_etl():
 
     # 多进程异步执行etl
     append_tables = ['ab_user', 'ab_user']  # 需要下载的表名
-    with ThreadPoolExecutor(max_workers=2) as executor:  # load(transform(extract(table)))
+    with ThreadPoolExecutor(max_workers=3) as executor:  # load(transform(extract(table)))
         tasks = {executor.submit(load, transform(extract(table))): table for table in
-                 append_tables}  # 返回每个线程的执行结果,60是进程超时参数
-        for future in as_completed(tasks):  # 完成select_table以后
+                 append_tables}  # 返回每个线程的执行结果,submit()中填写函数和形参,让所有进程异步执行任务
+        for future in as_completed(tasks):  # 完成select_table以后,遍历每个进程的执行情况
             table = tasks[future]  # 每个进程对应的的表名
             # 获取进程执行的结果
             try:
