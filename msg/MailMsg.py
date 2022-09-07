@@ -7,7 +7,12 @@
 
 import smtplib
 from email.mime.text import MIMEText
-from setting import *
+
+# 配置信息
+FROM_MAIL = '523393445@qq.com'
+FROM_PWD = 'wfanjiafpntkcaie'
+TO_MAIL = '523393445@qq.com'
+SMTP_CONFIG = {'host': 'smtp.qq.com', 'port': 25}
 
 
 class MailMsg:
@@ -52,7 +57,7 @@ class MailMsg:
         return True  # 屏蔽异常
 
 
-if __name__ == '__main__':
-    # 邮件发送示例
+# 邮件发送示例
+def demo():
     with MailMsg() as msg:
         msg.send_msg('主题', '内容:发生了异常')
