@@ -38,14 +38,14 @@ def dag_success_alert(context):
     dagrun_timeout=timedelta(minutes=60),
 )
 # 在DAG中定义任务
-def taskflow_api_etl():
+def csc_database_etl():
     @task(on_failure_callback=task_failure_alert)  # 提取-> 从数据库按照日期提取需要的表
     def extract_sql(table_name, conn_id='airflow_db') -> pd.DataFrame:
         # ----------------- 从Airflow保存的connection获取多数据源连接----------------- #
         sql_hook = MySqlHook(mysql_conn_id=conn_id)
         # ms_hook = MsSqlHook(mssql_conn_id='')
         # -----------------执行sql查询----------------- #
-        query_sql = 'SELECT * FROM `{table_name}`'.format(table_name=table_name)
+        query_sql = 'SELECT {column} FROM {table_name}'.format(column='*', table_name=table_name)
         df_extract = sql_hook.get_pandas_df(query_sql)  # 从Airflow的接口返回df格式
         return df_extract  # 传递到下一个子任务
 
@@ -65,7 +65,7 @@ def taskflow_api_etl():
             msg.send_msg(sub, content)
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
-    append_tables = ['ab_user', 'error_test', 'error_test']  # 待完成的任务:表名
+    append_tables = ['ab_user', 'ab_user', 'ab_user', 'error_test', 'error_test']  # 待完成的任务:表名
     with ThreadPoolExecutor(max_workers=3) as executor:  # 多进程异步执行
         _ = {executor.submit(lambda x: load_feather(transform_df(extract_sql(x))),
                              table): table for table in append_tables}  # 每个线程的执行结果,submit()中填写函数和形参
@@ -77,7 +77,7 @@ def taskflow_api_etl():
 
 
 # [START dag_invocation]
-dag = taskflow_api_etl()
+dag = csc_database_etl()
 # on_success_callback
 # [END dag_invocation]
 
