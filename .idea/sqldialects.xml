@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/airflow-study/download_table.py" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/airflow-study/etl_test.py" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/finished_pys/csc_etl.py" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/finished_pys/merge_table.py" dialect="MySQL" />
   </component>
 </project>
