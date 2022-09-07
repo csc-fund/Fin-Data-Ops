@@ -59,8 +59,8 @@ def taskflow_api_etl():
     # 多进程异步执行etl
     append_tables = ['ab_user', 'ab_user']  # 需要下载的表名
     with ThreadPoolExecutor(max_workers=2) as executor:  # load(transform(extract(table)))
-        tasks = executor.map(test, append_tables, timeout=60)  # 返回每个线程的执行结果,60是进程超时参数
-        logging.error('%s' % tasks)
+        tasks = {executor.submit(load, transform(extract(table))): table for table in
+                 append_tables}  # 返回每个线程的执行结果,60是进程超时参数
         for future in as_completed(tasks):  # 完成select_table以后
             table = tasks[future]  # 每个进程对应的的表名
             # 获取进程执行的结果
@@ -69,11 +69,11 @@ def taskflow_api_etl():
             # 结果异常处理
             except Exception as exc:
                 # print(table, exc)
-                logging.error('%s generated an res: %s' % (table, future))
+                logging.error('%s generated an exc: %s' % (table, exc))
                 # logging.error('%s generated an exception: %s' % (table, exc,))
             # 结果正常处理
             else:
-                logging.info('%s page is ok ' % table)
+                logging.info('%s page is %s ' % (table, res))
     # [END main_flow]
 
 
@@ -85,3 +85,4 @@ dag = taskflow_api_etl()
 # airflow scheduler
 # airflow tasks list taskflow_api_etl  --tree
 # airflow tasks test taskflow_api_etl extract 20220906
+#  airflow webserver --port 8080
