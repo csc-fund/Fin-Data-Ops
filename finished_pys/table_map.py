@@ -5,41 +5,43 @@
 # @Author    :Colin
 # @Note      :None
 
-MAP_DICT = {'CSC_Balance_Sheet': {'wind': {'AShareBalanceSheet': {'target_column': ['*'], 'date_column': 'ann_date', }},
-                                  'suntime': {
-                                      'fin_balance_sheet_gen': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+MAP_DICT = {'CSC_Balance_Sheet': {
 
-            'CSC_CashFlow': {'wind': {'AShareCashFlow': {'target_column': ['*'], 'date_column': 'ann_date', }},
-                             'suntime': {'fin_cash_flow_gen': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+    'wind': {'AShareBalanceSheet': {'target_column': ['*'], 'date_column': 'ann_date', 'code_column': 'code'}},
+    'suntime': {
+        'fin_balance_sheet_gen': {'target_column': ['*'], 'date_column': 'ann_date', }}},
 
-            'CSC_Income': {'wind': {'AShareIncome': {'target_column': ['*'], 'date_column': 'ann_date', }},
-                           'suntime': {'fin_income_gen': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+    'CSC_CashFlow': {'wind': {'AShareCashFlow': {'target_column': ['*'], 'date_column': 'ann_date', }},
+                     'suntime': {'fin_cash_flow_gen': {'target_column': ['*'], 'date_column': 'ann_date', }}},
 
-            'CSC_Prices': {'wind': {'AShareEODPrices': {'target_column': ['*'], 'date_column': 'ann_date', }},
-                           'suntime': {'qt_stk_daily': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+    'CSC_Income': {'wind': {'AShareIncome': {'target_column': ['*'], 'date_column': 'ann_date', }},
+                   'suntime': {'fin_income_gen': {'target_column': ['*'], 'date_column': 'ann_date', }}},
 
-            'CSC_Derivative': {
-                'wind': {'AShareEODDerivativeIndicator': {'target_column': ['s_val_mv'], 'date_column': 'ann_date', }},
-                'suntime': {'qt_stk_daily': {'target_column': ['tcap'], 'date_column': 'ann_date', }}},
+    'CSC_Prices': {'wind': {'AShareEODPrices': {'target_column': ['*'], 'date_column': 'ann_date', }},
+                   'suntime': {'qt_stk_daily': {'target_column': ['*'], 'date_column': 'ann_date', }}},
 
-            'CSC_Dividend': {'wind': {'AShareDividend': {'target_column': ['*'], 'date_column': 'ann_date', },
-                                      'AShareEXRightDividendRecord': {'target_column': ['*'],
-                                                                      'date_column': 'ann_date', }},
-                             'suntime': {
-                                 'bas_stk_hisdistribution': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+    'CSC_Derivative': {
+        'wind': {'AShareEODDerivativeIndicator': {'target_column': ['s_val_mv'], 'date_column': 'ann_date', }},
+        'suntime': {'qt_stk_daily': {'target_column': ['tcap'], 'date_column': 'ann_date', }}},
 
-            'CSC_Profit_Notice': {'wind': {'AShareProfitNotice': {'target_column': ['*'], 'date_column': 'ann_date', }},
-                                  'suntime': {'fin_performance_forecast': {'target_column': ['*'],
-                                                                           'date_column': 'ann_date', }}},
+    'CSC_Dividend': {'wind': {'AShareDividend': {'target_column': ['*'], 'date_column': 'ann_date', },
+                              'AShareEXRightDividendRecord': {'target_column': ['*'],
+                                                              'date_column': 'ann_date', }},
+                     'suntime': {
+                         'bas_stk_hisdistribution': {'target_column': ['*'], 'date_column': 'ann_date', }}},
 
-            'CSC_Profit_Express': {
-                'wind': {'AShareProfitExpress': {'target_column': ['*'], 'date_column': 'ann_date', }},
-                'suntime': {'fin_performance_express': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+    'CSC_Profit_Notice': {'wind': {'AShareProfitNotice': {'target_column': ['*'], 'date_column': 'ann_date', }},
+                          'suntime': {'fin_performance_forecast': {'target_column': ['*'],
+                                                                   'date_column': 'ann_date', }}},
 
-            'CSC_Test': {'wind': {'AShareProfitExpress': {'target_column': ['21', '21'], 'date_column': 'ann_date', },
-                                  'AShareProfitExpressb': {'target_column': ['*'], 'date_column': 'ann_date', }},
-                         'suntime': {'fin_performance_express': {'target_column': ['*'], 'date_column': 'ann_date', }}},
-            }
+    'CSC_Profit_Express': {
+        'wind': {'AShareProfitExpress': {'target_column': ['*'], 'date_column': 'ann_date', }},
+        'suntime': {'fin_performance_express': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+
+    'CSC_Test': {'wind': {'AShareProfitExpress': {'target_column': ['21', '21'], 'date_column': 'ann_date', },
+                          'AShareProfitExpressb': {'target_column': ['*'], 'date_column': 'ann_date', }},
+                 'suntime': {'fin_performance_express': {'target_column': ['*'], 'date_column': 'ann_date', }}},
+}
 
 
 class MapCsc:
@@ -62,8 +64,12 @@ class MapCsc:
     def get_csc_tables(self):
         return self.MAP_DICT.keys()
 
-# demo
-# app = MapCsc()
-# for i in app.get_csc_tables():
-#     print(i, app.get_map_tables(i))
-# print(MapCsc().get_map_tables('CSC_Profit_Notice'))
+
+def demo():
+    app = MapCsc()
+    for i in app.get_csc_tables():
+        print(i, app.get_map_tables(i))
+    print(MapCsc().get_map_tables('CSC_Profit_Notice'))
+
+
+demo()

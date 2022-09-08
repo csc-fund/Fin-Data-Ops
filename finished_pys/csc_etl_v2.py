@@ -16,7 +16,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import logging
-from table_map import MapCsc
 
 # -----------------airflow数据库接口----------------- #
 
@@ -61,13 +60,14 @@ def csc_database_etl():
         return df_extract, table_name  # 传递到下一个子任务
 
     @task(on_failure_callback=task_failure_alert)  # 变换 -> 对DataFrame进行格式转换
-    def transform_df(df_extract: pd.DataFrame, table_name):
-        df_transform = df_extract.fillna(0)  # 数据转换
+    def transform_df(df_input: pd.DataFrame, table_name):
+        df_transform = df_input.fillna(0)  # 数据转换
         return df_transform, table_name  # 传递到下一个子任务
 
     @task(on_success_callback=dag_success_alert, on_failure_callback=task_failure_alert)  # 加载-> 下载feather格式到文件系统
-    def load_feather(df_transform: pd.DataFrame, table_name):
-        df_transform.to_csv(f'{table_name}.csv')  # 储存文件
+    def load_feather(df_input: pd.DataFrame, table_name):
+        df_input.to_csv(f'{table_name}.csv')  # 储存文件
+        return df_input, table_name
 
     @task  # 检查-> 合并后的信息检查
     def check_merge():
@@ -76,14 +76,25 @@ def csc_database_etl():
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
     # 映射1对多关系
+    from table_map import MapCsc
     map_1n = MapCsc()
 
     # 按照规则运行所有任务流
     def start_tasks(csc_merge_table):
-        # print(merge_app.get_map_tables(csc_merge_table))
+        # 1.建立一个dict_merge用于Merge¬
+        dict_merge = {}
         for i in map_1n.get_map_tables(csc_merge_table):  # 获取所有待下载的表
-            load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220401)))
-        # 检查数据准确性
+            table_df, table_name = load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220102)))
+            dict_merge = dict_merge.update(
+                {table_name: table_df, 'date': table_df['ann_date'], 'code': table_df['ann_date']})
+        # 2.生成合并表
+
+        # 外连所有的公告日期,股票代码,生成一个公共的列,然后再去填充
+        df_merge = pd.DataFrame()
+        for name, df in dict_merge.items():
+            print('i')
+
+        # 3.检查数据准确性
         check_merge()
 
     # 多进程异步执行,submit()中填写函数和形参
