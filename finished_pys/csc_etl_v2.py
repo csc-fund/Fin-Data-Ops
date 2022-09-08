@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import logging
-from table_map import map_dict
+from table_map import MapCsc
 
 # -----------------airflow数据库接口----------------- #
 
@@ -75,34 +75,22 @@ def csc_database_etl():
         # df_transform.to_csv(f'{table_name}.csv')  # 储存文件
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
-
-    # 映射多源数据
-    def download_by_merge(csc_merge_table: list):
-        """
-        :param 传入1个目标合并表
-        :return:返回该目标合并表映射的的多数据源所有表
-        """
-        all_tables = []
-        for db in [i for i in map_dict[csc_merge_table].keys()]:
-            all_tables += [(db + '_af_connector', table,
-                            ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr['target_column']))),
-                            attr['date_column'],) for table, attr in map_dict[csc_merge_table][db].items()]
-        return all_tables
+    # 映射1对多关系
+    map_1n = MapCsc()
 
     # 按照规则运行所有任务流
     def start_tasks(csc_merge_table):
-        # 执行SQL的SELECT
-        for i in download_by_merge(csc_merge_table):
-            print(i)
+        # print(merge_app.get_map_tables(csc_merge_table))
+        for i in map_1n.get_map_tables(csc_merge_table):  # 获取所有待下载的表
             load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220401)))
         # 检查数据准确性
         check_merge()
 
-    # 多进程异步执行
+    # 多进程异步执行,submit()中填写函数和形参
     with ThreadPoolExecutor(max_workers=3) as executor:
-        _ = {executor.submit(start_tasks, table): table for table in map_dict.keys()}  # 每个线程的执行结果,submit()中填写函数和形参
+        _ = {executor.submit(start_tasks, table): table for table in map_1n.get_csc_tables()}
 
-    # [END main_flow]
+        # [END main_flow]
 
 
 # [END DAG]

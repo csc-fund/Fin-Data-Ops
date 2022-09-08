@@ -5,7 +5,7 @@
 # @Author    :Colin
 # @Note      :None
 import pandas as pd
-from table_map import map_dict
+from table_map import MapCsc
 
 # 1.分别下载总表中的子表
 #
