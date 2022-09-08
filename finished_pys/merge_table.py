@@ -21,7 +21,6 @@ from concurrent.futures import *  # 多进程并行
 
 # 需要的csc表
 def down_table_by_merge(csc_merge_table):
-
     # 1.根据映射关系获取待下载的所有数据源 map_dict[csc_merge_table].keys()
     # 2.获取每个数据源下的所有表
     all_tables = []

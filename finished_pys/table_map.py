@@ -36,7 +36,7 @@ map_dict = {'CSC_Balance_Sheet': {'wind': {'AShareBalanceSheet': {'target_column
                 'wind': {'AShareProfitExpress': {'target_column': ['*'], 'date_column': 'ann_date', }},
                 'suntime': {'fin_performance_express': {'target_column': ['*'], 'date_column': 'ann_date', }}},
 
-            'CSC_Test': {'wind': {'AShareProfitExpress': {'target_column': ['21','21'], 'date_column': 'ann_date', },
+            'CSC_Test': {'wind': {'AShareProfitExpress': {'target_column': ['21', '21'], 'date_column': 'ann_date', },
                                   'AShareProfitExpressb': {'target_column': ['*'], 'date_column': 'ann_date', }},
                          'suntime': {'fin_performance_express': {'target_column': ['*'], 'date_column': 'ann_date', }}},
             }
