@@ -44,6 +44,7 @@ def down_by_csc(target_table):
     # 获取要下载的字段
 
 
+
 def extract_sql(connector, table_name, column, date, ):
     query_sql = 'SELECT {column} FROM `{table_name}` WHERE `ann_date`={ann_date}'.format(column=column,
                                                                                          table_name=table_name,
