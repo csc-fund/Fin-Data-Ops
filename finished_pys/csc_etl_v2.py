@@ -74,23 +74,26 @@ def csc_database_etl():
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
 
-    # 根据映射关系获取待下载的所有数据源
+    # 映射多源数据
     def down_by_merge(csc_merge_table: list):
-        # 1.根据映射关系获取待下载的所有数据源 map_dict[csc_merge_table].keys()
-
-        # 2.获取每个数据源下的所有表
+        """
+        :param 传入1个目标合并表
+        :return:返回该目标合并表映射的的多数据源所有表
+        """
         all_tables = []
         for db in [i for i in map_dict[csc_merge_table].keys()]:
             all_tables += [
-                (db + '_af_connector', table, ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr))),
-                 ) for table, attr in map_dict[csc_merge_table][db].items()]
+                (db + '_af_connector', table,
+                 ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr['target_column']))),
+                 attr['date_column'],) for table, attr in map_dict[csc_merge_table][db].items()]
         return all_tables
 
     # 按照规则运行所有任务流
     def start_tasks(csc_merge_table):
         # 执行SQL的SELECT
         for i in down_by_merge(csc_merge_table):
-            load_feather(transform_df(extract_sql(i[0], i[1], i[2], 20220101, 20220401)))
+            print(i)
+            load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220401)))
 
     with ThreadPoolExecutor(max_workers=3) as executor:  # 多进程异步执行
         _ = {executor.submit(start_tasks, table): table for table in map_dict.keys()}  # 每个线程的执行结果,submit()中填写函数和形参
