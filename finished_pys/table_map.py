@@ -10,13 +10,14 @@ map_dict = {'CSC_Balance_Sheet': {'wind': {'AShareBalanceSheet': ['*']}, 'suntim
             'CSC_Income': {'wind': {'AShareIncome': ['*']}, 'suntime': {'fin_income_gen': ['*']}},
             'CSC_Prices': {'wind': {'AShareEODPrices': ['*']}, 'suntime': {'qt_stk_daily': ['*']}},
             'CSC_Derivative': {'wind': {'AShareEODDerivativeIndicator': ['s_val_mv']},
-                               'suntime': {'qt_stk_daily': ['tcap']}},  # 没搞清楚这是什么表
+                               'suntime': {'qt_stk_daily': ['tcap']}},
             'CSC_Dividend': {'wind': {'AShareDividend': ['*'], 'AShareEXRightDividendRecord': ['*']},
                              'suntime': {'bas_stk_hisdistribution': ['*']}},
             'CSC_Profit_Notice': {'wind': {'AShareProfitNotice': ['*']},
                                   'suntime': {'fin_performance_forecast': ['*']}},
             'CSC_Profit_Express': {'wind': {'AShareProfitExpress': ['*']},
                                    'suntime': {'fin_performance_express': ['*']}},
-            'CSC_Test': {'wind': {'AShareProfitExpress': ['21','21','d']},
-                                   'suntime': {'fin_performance_express': ['*']}},
+            'CSC_Test': {'wind': {'AShareProfitExpress': ['fin_performance_express', 'fin_performance_express',
+                                                          'fin_performance_express'],'AShareProfitExpressb':'*'},
+                         'suntime': {'fin_performance_express': ['*']}},
             }

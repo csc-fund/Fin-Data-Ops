@@ -9,48 +9,39 @@ from table_map import map_dict
 
 # 1.分别下载总表中的子表
 #
-append_tables = [i for i in map_dict.keys()]
+# append_tables = [i for i in map_dict.keys()]
 
 
 # WIND_TABLES = [map_dict[i]['wind'] for i in map_dict]
 # SUNTIME_TABLES = [map_dict[i]['suntime'] for i in map_dict]
 
 
+from concurrent.futures import *  # 多进程并行
+
+
 # 需要的csc表
-def down_by_csc(target_table):
-    # 根据映射关系获取待下载的表名
-    # 表2:待合并的表
-    csc_table = target_table
-
-    # 表1-1:要下载的表
-    wind_tables = [
-        ('wind_conn', table, ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr))), '20220202') for
-        table, attr in map_dict[csc_table]['wind'].items()]
-    for i in wind_tables:
-        extract_sql(i[0], i[1], i[2], i[3])
-
-    # 表1-2:要下载的表
-    suntime_tables = [
-        ('suntime_conn', table, ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr))), '20220202') for
-        table, attr in map_dict[csc_table]['suntime'].items()]
-    for i in suntime_tables:
-        extract_sql(i[0], i[1], i[2], i[3])
-
-    # 表1-n:要下载的表
-    # ...
-
-    # 一次下载2张表 原始表1,原始表2,多源合并3
-    # print(csc_table, wind_tables, suntime_tables)
-    # 获取要下载的字段
+def down_table_by_merge(csc_merge_table):
+    # 1.根据映射关系获取待下载的所有数据源 map_dict[csc_merge_table].keys()
+    # 2.获取每个数据源下的所有表
+    all_tables = []
+    for db in [i for i in map_dict[csc_merge_table].keys()]:
+        all_tables += [
+            (db + '_af_connector', table, ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr))),
+             'date' ,) for table, attr in map_dict[csc_merge_table][db].items()]
+    # 执行SQL的SELECT
+    for i in all_tables:
+        extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220401)
+        # print(i[2])
+        # s = f'# SELECT {i[2]} FROM `{i[1]}` WHERE `ann_date`=22'
+        # print(s)
 
 
-
-def extract_sql(connector, table_name, column, date, ):
-    query_sql = 'SELECT {column} FROM `{table_name}` WHERE `ann_date`={ann_date}'.format(column=column,
-                                                                                         table_name=table_name,
-                                                                                         ann_date=date)
-
-    print(query_sql, connector)
+def extract_sql(connector_id, table_name, column, date_column, start_date, end_date):
+    query_sql = f'SELECT {column} FROM `{table_name}` WHERE `{date_column}` BETWEEN {start_date} AND {end_date} '
+    print('\n', query_sql, connector_id)
 
 
-down_by_csc('CSC_Test')
+# down_table = [i for i in map_dict.keys()]
+with ThreadPoolExecutor(max_workers=2) as executor:  # 多进程异步执行
+    _ = {executor.submit(lambda x: down_table_by_merge(x),
+                         table): table for table in map_dict.keys()}
