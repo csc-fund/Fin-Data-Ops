@@ -69,29 +69,31 @@ def csc_database_etl():
         df_input.to_csv(f'{table_name}.csv')  # 储存文件
         return df_input, table_name
 
-    @task  # 检查-> 合并后的信息检查
+    @task  # 合并->数据合并
     def merge_csc(map_app: MapCsc):
         # 外连所有的公告日期,股票代码,生成一个公共的列,然后再去填充
-        map_app.get_map_tables()
+        return map_app.merge_multi_data()
         # df_transform.to_csv(f'{table_name}.csv')  # 储存文件
 
-    # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
-    # 映射1对多关系
+    @task  # 检查-> 合并后的信息检查
+    def check_merge():
+        pass
 
+    # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
     # 按照规则运行所有任务流
     def start_tasks(csc_merge_table):
-        map_app = MapCsc(csc_merge_table)
+        # 实例化用于合并的APP
+        MAP = MapCsc(csc_merge_table)
         # 1.建立一个dict_merge用于Merge
-        for i in map_app.get_map_tables():  # connector_id, table_name, column, date_column,code_column
-            table_df, table_name = load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220102)))
-            map_app.update_multi_data(
-                {'table_name': table_name, 'table_df': table_df, 'date': table_df[i[3]], 'code': table_df[i[4]], })
+        for i in MAP.MULTI_MAP_TABLES:  # connector_id, table_name, column, date_column,code_column
+            table_df, _ = load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220102)))
+            MAP.update_multi_data({i[1]: {'table_df': table_df, 'date': table_df[i[3]], 'code': table_df[i[4]], }})
 
         # 2.生成合并表
-        merge_csc(map_app)
+        load_feather(transform_df(merge_csc(MAP)))
 
         # 3.检查数据准确性
-        # check_merge()
+        check_merge()
 
     # 多进程异步执行,submit()中填写函数和形参
     with ThreadPoolExecutor(max_workers=3) as executor:
