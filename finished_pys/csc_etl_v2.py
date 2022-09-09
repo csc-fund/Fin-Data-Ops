@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 import logging
 
 # -----------------airflow数据库接口----------------- #
-
+from table_map import *
 
 # -----------------配置本地日志信息----------------- #
 logging.basicConfig(level=logging.DEBUG,  # 控制台打印的日志级别
@@ -70,36 +70,32 @@ def csc_database_etl():
         return df_input, table_name
 
     @task  # 检查-> 合并后的信息检查
-    def check_merge():
-        print('ok')
+    def merge_csc(map_app: MapCsc):
+        # 外连所有的公告日期,股票代码,生成一个公共的列,然后再去填充
+        map_app.get_map_tables()
         # df_transform.to_csv(f'{table_name}.csv')  # 储存文件
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
     # 映射1对多关系
-    from table_map import MapCsc
-    map_1n = MapCsc()
 
     # 按照规则运行所有任务流
     def start_tasks(csc_merge_table):
-        # 1.建立一个dict_merge用于Merge¬
-        dict_merge = {}
-        for i in map_1n.get_map_tables(csc_merge_table):  # 获取所有待下载的表
+        map_app = MapCsc(csc_merge_table)
+        # 1.建立一个dict_merge用于Merge
+        for i in map_app.get_map_tables():  # connector_id, table_name, column, date_column,code_column
             table_df, table_name = load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20220101, 20220102)))
-            dict_merge = dict_merge.update(
-                {table_name: table_df, 'date': table_df['ann_date'], 'code': table_df['ann_date']})
-        # 2.生成合并表
+            map_app.update_multi_data(
+                {'table_name': table_name, 'table_df': table_df, 'date': table_df[i[3]], 'code': table_df[i[4]], })
 
-        # 外连所有的公告日期,股票代码,生成一个公共的列,然后再去填充
-        df_merge = pd.DataFrame()
-        for name, df in dict_merge.items():
-            print('i')
+        # 2.生成合并表
+        merge_csc(map_app)
 
         # 3.检查数据准确性
-        check_merge()
+        # check_merge()
 
     # 多进程异步执行,submit()中填写函数和形参
     with ThreadPoolExecutor(max_workers=3) as executor:
-        _ = {executor.submit(start_tasks, table): table for table in map_1n.get_csc_tables()}
+        _ = {executor.submit(start_tasks, table): table for table in MAP_DICT.keys()}
 
         # [END main_flow]
 
