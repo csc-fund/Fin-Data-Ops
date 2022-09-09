@@ -76,7 +76,7 @@ MAP_DICT = {
     'CSC_Test':
         {
             'wind':
-                {'AShareProfitExpress': {'target_column': ['21', '21'], 'date_column': 'ann_date',
+                {'AShareProfitExpress': {'target_column': ['*'], 'date_column': 'ann_date',
                                          'code_column': 'code'},
                  'AShareProfitExpressb': {'target_column': ['*'], 'date_column': 'ann_date',
                                           'code_column': 'code'}
@@ -119,7 +119,7 @@ class MapCsc:
         self.MULTI_DF_DICT.update(df_dict)
 
     # 合并多源数据
-    def merge_multi_data(self):
+    def merge_multi_data(self) -> pd.DataFrame:
         # 日期和代码提取出来
         df_date_code = [pd.DataFrame([i['code'], i['date']]).transpose() for i in self.MULTI_DF_DICT.values()]
 
@@ -129,7 +129,8 @@ class MapCsc:
         # 合并所有字段
         for name, value in self.MULTI_DF_DICT.items():
             self.MULTI_DATE_CODE = pd.merge(left=self.MULTI_DATE_CODE, right=value['table_df'], how='left',
-                                            left_on=['code', 'date'], right_on=['code', 'date'], )
+                                            left_on=['code', 'date'], right_on=['code', 'date'],
+                                            suffixes=(f'_x', f'{name}_y'))
 
         return self.MULTI_DATE_CODE
 

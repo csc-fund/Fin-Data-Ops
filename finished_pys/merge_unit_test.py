@@ -17,11 +17,14 @@ df2 = pd.DataFrame(
     {'date': [20210101, 20210102, 20210103], 'code': ['000001.SZ', '000001.SZ', '000001.SZ'], 'attr1': [2, 1, 1]})
 df3 = pd.DataFrame(
     {'date': [20210101, 20210102, 20220101], 'code': ['000001.SZ', '000001.SZ', '000001.SZ'], 'attr1': [2, 1, 1]})
+df4 = pd.DataFrame(
+    {'date': [20210101, 20210102, 20220101], 'code': ['000001.SZ', '000001.SZ', '000001.SZ'], 'attr1': [2, 1, 1]})
 
 # 更新
 map_app.update_multi_data({'df1': {'table_df': df1, 'date': df1['date'], 'code': df1['code'], }})
 map_app.update_multi_data({'df2': {'table_df': df2, 'date': df2['date'], 'code': df2['code'], }})
 map_app.update_multi_data({'df3': {'table_df': df3, 'date': df3['date'], 'code': df3['code'], }})
+map_app.update_multi_data({'df4': {'table_df': df4, 'date': df4['date'], 'code': df4['code'], }})
 
 # 合并
 print(map_app.merge_multi_data())
