@@ -27,5 +27,5 @@ map_app.update_multi_data({'df3': {'table_df': df3, 'table_date': 'date', 'table
 map_app.update_multi_data({'df4': {'table_df': df4, 'table_date': 'date', 'table_code': 'code', }})
 
 # 合并
+# print(map_app.MULTI_DF_DICT['df1']['table_df'].columns)
 print(map_app.merge_multi_data())
-# print(map_app.MULTI_DF_DICT)

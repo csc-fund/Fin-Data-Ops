@@ -133,10 +133,13 @@ class MapCsc:
 
         # 合并所有字段
         for key, value in self.MULTI_DF_DICT.items():
-            self.MULTI_DATE_CODE = pd.merge(left=self.MULTI_DATE_CODE, right=value['table_df'], how='left',
+            pre_name = key + '_'  # 重命名,数据来源+字段名
+            self.MULTI_DATE_CODE = pd.merge(left=self.MULTI_DATE_CODE, right=value['table_df'].rename(
+                columns={i: pre_name + i for i in value['table_df'].columns}), how='left',
                                             left_on=['csc_code', 'csc_date'],
-                                            right_on=[value['table_code'], value['table_date']]).drop(
-                columns=[value['table_code'], value['table_date']])
+                                            right_on=[pre_name + value['table_code'],
+                                                      pre_name + value['table_date']]).drop(
+                columns=[pre_name + value['table_code'], pre_name + value['table_date']])
 
         # 保存
         return self.MULTI_DATE_CODE
@@ -147,5 +150,3 @@ class MapCsc:
 
     def get_self(self):
         return self
-
-
