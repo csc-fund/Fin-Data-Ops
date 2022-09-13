@@ -7,6 +7,8 @@
 
 
 # AirFlow连接器的名称
+import time
+
 import pandas as pd
 
 AF_CONN = '_af_connector'
@@ -120,8 +122,11 @@ class MapCsc:
 
     # 合并多源数据
     def merge_multi_data(self) -> pd.DataFrame:
+
         # 日期和代码提取出来
-        df_date_code = [pd.DataFrame([i['code'], i['date']]).transpose() for i in self.MULTI_DF_DICT.values()]
+        df_date_code = [pd.DataFrame([i['table_df'][i['table_code']], i['table_df'][i['table_date']]]).transpose()
+                        for i in self.MULTI_DF_DICT.values()]
+        # print(df_date_code[0])
 
         # 拼起来,并去掉code和date完全一样的行,得到面板数据的标识列
         self.MULTI_DATE_CODE = pd.concat([i for i in df_date_code], axis=0).drop_duplicates()
@@ -129,8 +134,7 @@ class MapCsc:
         # 合并所有字段
         for name, value in self.MULTI_DF_DICT.items():
             self.MULTI_DATE_CODE = pd.merge(left=self.MULTI_DATE_CODE, right=value['table_df'], how='left',
-                                            left_on=['code', 'date'], right_on=['code', 'date'],
-                                            suffixes=(f'_x', f'{name}_y'))
+                                            left_on=['code', 'date'], right_on=['code', 'date'])
 
         return self.MULTI_DATE_CODE
 
