@@ -37,6 +37,11 @@ fh.setFormatter(
 logging.getLogger().addHandler(fh)
 
 
+# 获得当前信息
+def task_info(context):
+    return f"{context['task_instance_key_str']}"
+
+
 # 定义失败提醒
 def task_failure_alert(context):
     from msg.MailMsg import MailMsg
@@ -102,16 +107,21 @@ def csc_database_etl():
         MAP = MapCsc(csc_merge_table)
         # 1.建立一个dict_merge用于Merge
         for i in MAP.MULTI_MAP_TABLES:  # [( connector_id, table_name, column, date_column,code_column ),...]
-            table_df = load_feather(transform_df(extract_sql(i[0], i[1], i[2], i[3], 20210101, 20230101)))['df_value']
+            table_df = load_feather.override(task_id='Load_' + i[1])(
+                transform_df.override(task_id='Transform_' + i[1])(
+                    extract_sql.override(task_id='Extract_' + i[1])(i[0], i[1], i[2], i[3], 20210101, 20230101)))[
+                'df_value']
+            # 更新数据
             MAP.update_multi_data(
                 {i[1]: {'table_df': table_df, 'table_name': i[1], 'table_date': i[3], 'table_code': i[4]}})
         # 2.生成合并表
-        load_feather(merge_csc(csc_merge_table, MAP.MULTI_DF_DICT))
+        load_feather.override(task_id='Load_' + csc_merge_table)(
+            merge_csc.override(task_id='Merge_' + csc_merge_table)(csc_merge_table, MAP.MULTI_DF_DICT))
         # 3.检查数据准确性
 
     # 多进程异步执行,submit()中填写函数和形参
     with ThreadPoolExecutor(max_workers=3) as executor:
-        _ = {executor.submit(start_tasks, table): table for table in ['CSC_Test', ]}
+        _ = {executor.submit(start_tasks, table): table for table in ['CSC_Test', 'CSC_Test']}
     # [END main_flow]
 
 
