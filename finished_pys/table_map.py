@@ -99,7 +99,7 @@ class MapCsc:
         self.MAP_DICT = MAP_DICT  # 静态的字典文件
         # --------------要处理的数据-------------- #
         self.CSC_MERGE_TABLE = csc_merge_table  # 输入的CSC表名
-        self.MULTI_MAP_TABLES = self.get_map_tables()  # 返回的CSC对应的所有表
+        self.MULTI_MAP_TABLES = None  # 返回的CSC对应的所有表
         self.MULTI_DF_DICT = {}  # 多数据源的df字典
         self.MULTI_DATE_CODE = pd.DataFrame()  # 多源数据公共的日期与股票代码
 
@@ -114,7 +114,8 @@ class MapCsc:
                                 ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr['target_column']))),
                                 attr['date_column'], attr['code_column'],) for table, attr in
                                self.MAP_DICT[self.CSC_MERGE_TABLE][db].items()]
-        return all_map_tables
+        self.MULTI_MAP_TABLES = all_map_tables
+        return self.MULTI_MAP_TABLES
 
     # 从外部更新多源数据
     def update_multi_data(self, df_dict: dict):

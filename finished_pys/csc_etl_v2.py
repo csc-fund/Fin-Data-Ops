@@ -106,7 +106,7 @@ def csc_database_etl():
         # 实例化用于合并的APP
         MAP = MapCsc(csc_merge_table)
         # 1.建立一个dict_merge用于Merge
-        for i in MAP.MULTI_MAP_TABLES:  # [( connector_id, table_name, column, date_column,code_column ),...]
+        for i in MAP.get_map_tables():  # [( connector_id, table_name, column, date_column,code_column ),...]
             table_df = load_feather.override(task_id='L_' + i[0].split('_')[0] + '_' + i[1])(
                 transform_df.override(task_id='T_' + i[0].split('_')[0] + '_' + i[1])(
                     extract_sql.override(task_id='E_' + i[0].split('_')[0] + '_' + i[1])(
