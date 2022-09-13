@@ -50,7 +50,8 @@ def dag_success_alert(context):
 )
 # 在DAG中定义任务
 def csc_database_etl():
-    @task(on_failure_callback=task_failure_alert)  # 提取-> 从数据库按照日期提取需要的表
+    # 提取-> 从数据库按照日期提取需要的表
+    @task(on_failure_callback=task_failure_alert)
     def extract_sql(connector_id, table_name, column, date_column, start_date, end_date) -> dict:
         # ----------------- 从Airflow保存的connection获取多数据源连接----------------- #
         sql_hook = BaseHook.get_connection(connector_id).get_hook()
@@ -59,12 +60,14 @@ def csc_database_etl():
         df_extract = sql_hook.get_pandas_df(query_sql)  # 从Airflow的接口返回df格式
         return {'table_name': table_name, 'df_value': df_extract}  # 传递到下一个子任务
 
-    @task(on_failure_callback=task_failure_alert)  # 变换 -> 对DataFrame进行格式转换
+    # 变换 -> 对DataFrame进行格式转换
+    @task(on_failure_callback=task_failure_alert)
     def transform_df(df_dict: dict) -> dict:
         df_transform = df_dict['df_value'].fillna(0)  # 数据转换
         return {'table_name': df_dict['table_name'], 'df_value': df_transform}  # 传递到下一个子任务
 
-    @task(on_success_callback=dag_success_alert, on_failure_callback=task_failure_alert)  # 加载-> 下载feather格式到文件系统
+    # 加载-> 下载feather格式到文件系统
+    @task(on_success_callback=dag_success_alert, on_failure_callback=task_failure_alert)
     def load_feather(df_dict: dict) -> dict:
         name = df_dict['table_name']
         df_dict['df_value'].to_csv(f'{name}.csv')  # 储存文件
@@ -81,8 +84,7 @@ def csc_database_etl():
         pass
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
-    # 按照规则运行所有任务流
-    def start_tasks(csc_merge_table):
+    def start_tasks(csc_merge_table):  # 按照规则运行所有任务流
         # 实例化用于合并的APP
         MAP = MapCsc(csc_merge_table)
         # 1.建立一个dict_merge用于Merge
