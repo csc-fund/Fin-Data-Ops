@@ -85,22 +85,32 @@ def csc_database_etl():
     @task  # 测试
     def test(MULTI_DF_DICT: dict):
         # run1 ok
-        MULTI_DF_DICT['AShareProfitExpress']['table_df'][MULTI_DF_DICT['AShareProfitExpress']['table_date']].to_csv(
-            'test1.csv')
-        # 日期和代码提取出来
-        df_date_code = [pd.DataFrame([i['table_df'][i['table_code']], i['table_df'][i['table_date']]]).transpose()
-                        for i in MULTI_DF_DICT.values()]
+        # MULTI_DF_DICT['AShareProfitExpress']['table_df'][[MULTI_DF_DICT['AShareProfitExpress']['table_date']]].rename(
+        #     columns={'ann_date': 'csc_code'}).to_csv(
+        #     'test1.csv')
+        # 提取日期和代码列
+        #
+        # df = MULTI_DF_DICT['AShareProfitExpress']['table_df'].loc[:,
+        #      [MULTI_DF_DICT['AShareProfitExpress']['table_code'], MULTI_DF_DICT['AShareProfitExpress']['table_date']]]
+        # df.to_csv('test2.csv')  # run2 ok
+
+        df_date_code = [
+            i['table_df'].loc[:, [i['table_code'], i['table_date']]].rename(
+                columns={i['table_code']: 'csc_code', i['table_date']: 'csc_date'}) for i in MULTI_DF_DICT.values()]
 
         # 拼起来,并去掉code和date完全一样的行,得到面板数据的标识列
-        MULTI_DATE_CODE = pd.concat([i for i in df_date_code], axis=0).drop_duplicates()
+        MULTI_DATE_CODE = pd.concat([pd.DataFrame(i) for i in df_date_code], axis=0).drop_duplicates()
+        MULTI_DATE_CODE.to_csv('test3.csv')
+        return df_date_code
 
-        # 合并所有字段
-        for name, value in MULTI_DF_DICT.items():
-            MULTI_DATE_CODE = pd.merge(left=MULTI_DATE_CODE, right=value['table_df'], how='left',
-                                       left_on=['code', 'date'], right_on=['code', 'date'])
-
-        MULTI_DATE_CODE.to_csv('test.csv')
-        return MULTI_DATE_CODE
+        # # 合并所有字段
+        # for key, value in MULTI_DF_DICT.items():
+        #     MULTI_DATE_CODE = pd.merge(left=MULTI_DATE_CODE, right=value['table_df'], how='left',
+        #                                left_on=['csc_code', 'csc_date'],
+        #                                right_on=[value['table_code'], value['table_date']])
+        #
+        # MULTI_DATE_CODE.to_csv('test4.csv')
+        # return MULTI_DATE_CODE
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
     # 按照规则运行所有任务流
@@ -115,7 +125,7 @@ def csc_database_etl():
                 {i[1]: {'table_df': table_df, 'table_name': i[1], 'table_date': i[3], 'table_code': i[4]}})
             # save_df(MAP.MULTI_DF_DICT[i[1]]['table_df'])
         logging.error(MAP.MULTI_DF_DICT)
-        test(MAP.MULTI_DF_DICT)
+        logging.error(test(MAP.MULTI_DF_DICT))
         # df = MAP.merge_multi_data()
         # print(MAP.MULTI_DATE_CODE)
         # df.to_csv('merge.csv')
@@ -143,8 +153,8 @@ dag = csc_database_etl()
 # [END dag_invocation]
 
 
-# 调试命令
+# -----------------调试命令----------------- #
+# airflow webserver --port 8080
 # airflow scheduler
 # airflow tasks list taskflow_api_etl  --tree
 # airflow tasks test taskflow_api_etl extract 20220906
-# airflow webserver --port 8080
