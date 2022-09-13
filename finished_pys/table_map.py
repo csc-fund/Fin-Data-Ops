@@ -132,8 +132,8 @@ class MapCsc:
         self.MULTI_DATE_CODE = pd.concat([i for i in df_date_code], axis=0).drop_duplicates()
 
         # 合并所有字段
-        for key, value in self.MULTI_DF_DICT.items():
-            pre_name = key + '_'  # 重命名,数据来源+字段名
+        for value in self.MULTI_DF_DICT.values():
+            pre_name = value['table_db'] + '_' + value['table_name'] + '_'  # 重命名,数据来源+字段名
             self.MULTI_DATE_CODE = pd.merge(left=self.MULTI_DATE_CODE, right=value['table_df'].rename(
                 columns={i: pre_name + i for i in value['table_df'].columns}), how='left',
                                             left_on=['csc_code', 'csc_date'],
