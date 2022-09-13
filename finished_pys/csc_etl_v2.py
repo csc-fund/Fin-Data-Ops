@@ -4,7 +4,7 @@
 # @Time      :2022/9/7 15:16
 # @Author    :Colin
 # @Note      :None
-
+import os
 import pendulum
 from airflow.decorators import dag, task
 # -----------------airflow数据库接口----------------- #
@@ -20,25 +20,35 @@ import logging
 # -----------------airflow数据库接口----------------- #
 from finished_pys.table_map import *
 
+# -----------------输出文件的路径----------------- #
+OUTPUT_PATH = '/Users/mac/PycharmProjects/My-Air-Flow/down_files/'
+if not os.path.exists(OUTPUT_PATH):
+    os.mkdir(OUTPUT_PATH)
+
 # -----------------配置本地日志信息----------------- #
-logging.basicConfig(level=logging.DEBUG,  # 控制台打印的日志级别
-                    filename='new.log',
-                    filemode='a',  # 模式，有w和a，w就是写模式，a是追加模式，
-                    format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'  # 日志格式
-                    )
+# logging.basicConfig(level=logging.DEBUG,  # 控制台打印的日志级别
+#                     filename=f'{OUTPUT_PATH}csc.log',
+#                     filemode='a',  # 模式，有w和a，w就是写模式，a是追加模式，
+#                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'  # 日志格式
+#                     )
+fh = logging.FileHandler(f'{OUTPUT_PATH}csc.log', encoding='utf8', mode='a')
+fh.setFormatter(
+    logging.Formatter('%(asctime)s %(filename)s %(funcName)s [line:%(lineno)d] %(levelname)s %(message)s'))
+logging.getLogger().addHandler(fh)
 
 
-# 定义失败提醒,任意一个任务失败整个DAG失败
+# 定义失败提醒
 def task_failure_alert(context):
     from msg.MailMsg import MailMsg
     with MailMsg() as msg:
         msg.send_msg('任务失败',
                      f"任务失败了!, 失败任务ID是: {context['task_instance_key_str']}")
+        logging.error(f"任务失败了!, 失败任务ID是: {context['task_instance_key_str']}")
 
 
-# 定义成功提醒 放在任务流的末尾,所有任务流成功即DAG成功
+# 定义成功提醒
 def dag_success_alert(context):
-    print(f"DAG has succeeded, run_id: {context['run_id']}")
+    logging.info(f"DAG has succeeded, run_id: {context['run_id']}")
 
 
 # [START DAG] 实例化一个DAG
@@ -47,6 +57,7 @@ def dag_success_alert(context):
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=timedelta(minutes=60),
+    on_success_callback=dag_success_alert,
 )
 # 在DAG中定义任务
 def csc_database_etl():
@@ -67,13 +78,15 @@ def csc_database_etl():
         return {'table_name': df_dict['table_name'], 'df_value': df_transform}  # 传递到下一个子任务
 
     # 加载-> 下载feather格式到文件系统
-    @task(on_success_callback=dag_success_alert, on_failure_callback=task_failure_alert)
+    @task(on_failure_callback=task_failure_alert, on_success_callback=dag_success_alert)
     def load_feather(df_dict: dict) -> dict:
+        # 路径
         name = df_dict['table_name']
-        df_dict['df_value'].to_csv(f'{name}.csv')  # 储存文件
+        df_dict['df_value'].to_csv(f'{OUTPUT_PATH}{name}.csv')  # 储存文件
         return df_dict
 
-    @task  # 合并->数据合并
+    # 合并->数据合并
+    @task(on_failure_callback=task_failure_alert)
     def merge_csc(MERGE_TABLE: str, MULTI_DF_DICT: dict):
         app = MapCsc(MERGE_TABLE)
         app.update_multi_data(MULTI_DF_DICT)

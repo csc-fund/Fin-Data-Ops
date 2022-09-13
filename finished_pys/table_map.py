@@ -6,11 +6,11 @@
 # @Note      :None
 
 
-# AirFlow连接器的名称
 import time
 
 import pandas as pd
 
+# AirFlow连接器的名称
 AF_CONN = '_af_connector'
 # 人工定义的数据映射字典
 MAP_DICT = {
@@ -147,3 +147,5 @@ class MapCsc:
 
     def get_self(self):
         return self
+
+
