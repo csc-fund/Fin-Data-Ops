@@ -5,8 +5,9 @@
 # @Author    :Colin
 # @Note      :None
 
-from table_map import *
+from map_table import MapCsc
 import pandas as pd
+import numpy as np
 
 map_app = MapCsc('CSC_Test')
 tables = map_app.get_map_tables()
@@ -32,4 +33,25 @@ map_app.update_multi_data(
 
 # 合并
 # print(map_app.MULTI_DF_DICT['df1']['table_df'].columns)
-print(map_app.merge_multi_data())
+map_app.merge_multi_data()
+np_m = map_app.MULTI_DATE_CODE.iloc[:, 2:].to_numpy('<f4')
+np_m = np.array(np_m)
+np_m = np.where(np.isnan(np_m), 0, np_m)
+
+# print(np_m[:, :])
+
+# np_1 = np_m.take(1, 1)
+# np_2 = np_m.take(2, 1)
+# np_3 = np_m.take(3, 1)
+
+# print(np_1 == np_3)
+
+# 均值法
+
+# 先排好位置,然后再比较
+# np_a = np.average([np_1, np_2, np_3], axis=0)
+# print(np_a.reshape(-1, 1))
+# print(np.isclose(np_1, np_2, 1.e-1, 1.e-1))
+# 先求出均值,再求均值距离
+np_w = pd.read_feather('20220830.f')
+print(np_w.columns)

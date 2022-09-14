@@ -8,9 +8,7 @@ import os
 import pendulum
 from airflow.decorators import dag, task
 # -----------------airflow数据库接口----------------- #
-from airflow.providers.mysql.hooks.mysql import MySqlHook  # MySql数据库
-from airflow.providers.common.sql.hooks.sql import BaseHook, DbApiHook  # 通用数据库
-from airflow.providers.microsoft.mssql.hooks.mssql import MsSqlHook  # MsSql数据库
+from airflow.providers.common.sql.hooks.sql import BaseHook  # 通用数据库接口
 from concurrent.futures import *  # 多进程并行
 import pandas as pd
 import numpy as np
@@ -18,7 +16,7 @@ from datetime import datetime, timedelta
 import logging
 
 # -----------------airflow数据库接口----------------- #
-from finished_pys.table_map import *
+from finished_pys.map_table import *
 
 # -----------------输出文件的路径----------------- #
 OUTPUT_PATH = '/Users/mac/PycharmProjects/My-Air-Flow/down_files/'
@@ -98,8 +96,9 @@ def csc_database_etl():
         return {'table_name': MERGE_TABLE, 'df_value': app.merge_multi_data()}  # 传递到下一个子任务
 
     @task  # 检查-> 合并后的信息检查
-    def check_merge(df: pd.DataFrame):
-        pass
+    def check_merge(df_dict: dict):
+        app = MapCsc(df_dict['table_name'])
+        app.update_date_code(df_dict['df_value'])
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
     def start_tasks(csc_merge_table):  # 按照规则运行所有任务流
@@ -107,9 +106,10 @@ def csc_database_etl():
         MAP = MapCsc(csc_merge_table)
         # 1.建立一个dict_merge用于Merge
         for i in MAP.get_map_tables():  # [( connector_id, table_name, column, date_column,code_column ),...]
-            table_df = load_feather.override(task_id='L_' + i[0].split('_')[0] + '_' + i[1])(
-                transform_df.override(task_id='T_' + i[0].split('_')[0] + '_' + i[1])(
-                    extract_sql.override(task_id='E_' + i[0].split('_')[0] + '_' + i[1])(
+            last_name = i[0].split('_')[0] + '_' + i[1]  # 数据源+表名
+            table_df = load_feather.override(task_id='L_' + last_name)(
+                transform_df.override(task_id='T_' + last_name)(
+                    extract_sql.override(task_id='E_' + last_name)(
                         i[0], i[1], i[2], i[3], 20210101, 20230101)))['df_value']
             # 更新数据
             MAP.update_multi_data(
@@ -122,7 +122,7 @@ def csc_database_etl():
 
     # 多进程异步执行,submit()中填写函数和形参
     with ThreadPoolExecutor(max_workers=3) as executor:
-        _ = {executor.submit(start_tasks, table): table for table in ['CSC_Test', 'CSC_Test']}
+        _ = {executor.submit(start_tasks, table): table for table in ['CSC_Test', 'CSC_Test2']}
     # [END main_flow]
 
 

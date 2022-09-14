@@ -9,6 +9,7 @@
 import time
 
 import pandas as pd
+import numpy as np
 
 # AirFlow连接器的名称
 AF_CONN = '_af_connector'
@@ -88,6 +89,18 @@ MAP_DICT = {
                                              'code_column': 'code'}
                  }
         },
+    # 用于测试的表
+    'CSC_Test2':
+        {
+            'wind':
+                {'AShareProfitExpress': {'target_column': ['*'], 'date_column': 'ann_date',
+                                         'code_column': 'code'},
+                 },
+            'suntime':
+                {'fin_performance_express': {'target_column': ['*'], 'date_column': 'ann_date',
+                                             'code_column': 'code'}
+                 }
+        },
 }
 
 
@@ -106,14 +119,14 @@ class MapCsc:
     # 返回映射的表
     def get_map_tables(self) -> list:
         """
-        :return:[( connector_id, table_name, column, date_column,code_column ),...]
+        :return:[( connector_id, table_name, column, date_column,code_column,column_len ),...]
         """
         all_map_tables = []
         for db in [i for i in self.MAP_DICT[self.CSC_MERGE_TABLE].keys()]:
             all_map_tables += [(db + self.AF_CONN, table,
                                 ','.join(list(map(lambda x: '`' + x + '`' if x != '*' else x, attr['target_column']))),
-                                attr['date_column'], attr['code_column'],) for table, attr in
-                               self.MAP_DICT[self.CSC_MERGE_TABLE][db].items()]
+                                attr['date_column'], attr['code_column'], len(attr['target_column']))
+                               for table, attr in self.MAP_DICT[self.CSC_MERGE_TABLE][db].items()]
         self.MULTI_MAP_TABLES = all_map_tables
         return self.MULTI_MAP_TABLES
 
@@ -126,8 +139,8 @@ class MapCsc:
         # 提取代码和日期
         df_date_code = [
             i['table_df'].loc[:, [i['table_code'], i['table_date']]].rename(
-                columns={i['table_code']: 'csc_code', i['table_date']: 'csc_date'}) for i in
-            self.MULTI_DF_DICT.values()]
+                columns={i['table_code']: 'csc_code', i['table_date']: 'csc_date'})
+            for i in self.MULTI_DF_DICT.values()]
 
         # 拼起来,并去掉code和date完全一样的行,得到面板数据的标识列
         self.MULTI_DATE_CODE = pd.concat([i for i in df_date_code], axis=0).drop_duplicates()
@@ -145,9 +158,19 @@ class MapCsc:
         # 保存
         return self.MULTI_DATE_CODE
 
-    # 没什么用
-    def get_csc_tables(self):
-        return self.MAP_DICT.keys()
+    # 更新MULTI_DATE_CODE
+    def update_date_code(self, MULTI_DATE_CODE: pd.DataFrame):
+        self.MULTI_DATE_CODE = MULTI_DATE_CODE
 
-    def get_self(self):
-        return self
+    # 多源数据对比
+    def check_multi_data(self):
+        # 1.按照列摆好
+        column_len = [i[5] for i in self.get_map_tables()]
+
+        # 按距离跳过对比
+        # 1.三者一样不用管
+        self.MULTI_DATE_CODE.iloc[:, 0:2] = 1
+
+        # 输出一列到csc填充
+        # if not self.MULTI_MAP_TABLES:
+        #     self.get_map_tables()
