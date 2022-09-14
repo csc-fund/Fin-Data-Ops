@@ -112,6 +112,7 @@ class MapCsc:
         self.MAP_DICT = MAP_DICT  # 静态的字典文件
         # --------------要处理的数据-------------- #
         self.CSC_MERGE_TABLE = csc_merge_table  # 输入的CSC表名
+        self.DB_LIST = None
         self.MULTI_MAP_TABLES = None  # 返回的CSC对应的所有表
         self.MULTI_TABLE_DICT = self.MAP_DICT[csc_merge_table]  # 多数据源的df字典
         self.MULTI_DATE_CODE = pd.DataFrame()  # 多源数据公共的日期与股票代码
@@ -184,26 +185,28 @@ class MapCsc:
 
         # 3.对比 - 只做了2个的,如果要做2个以上的需要自己写一个对比+合并函数
         self.ATTR_COLUMN = [f'attr{i}' for i in range(len(df_joins[0].columns))]
-        # print( df_joins[0])
-        # print(df_joins[1])
         df_joins[0].set_axis(self.ATTR_COLUMN, axis=1, inplace=True)
         df_joins[1].set_axis(self.ATTR_COLUMN, axis=1, inplace=True)
         df_compare = df_joins[0].compare(df_joins[1], keep_shape=True, keep_equal=True)
-        return df_compare
+        # print(self.MULTI_TABLE_DICT.keys())
+        self.DB_LIST = list(self.MULTI_TABLE_DICT.keys())
+        df_compare.columns = [f'{i[1]}_{i[0]}'.replace('self', self.DB_LIST[0]).replace('other', self.DB_LIST[1])
+                              for i in df_compare.columns]
+        return df_compare.sort_index().reset_index()
 
 
 def demo():
-    df = pd.DataFrame(np.array([['000001.SZ', 20220101, 1, ],
+    df = pd.DataFrame(np.array([['000001.SZ', 20220105, 1, ],
                                 ['000001.SZ', 20220104, 1, ],
-                                ['000001.SZ', 20220105, 1, ],
+                                ['000001.SZ', 20220101, 1, ],
                                 ]), columns=['code', 'ann_date', 'attr1', ])
-    df2 = pd.DataFrame(np.array([['000001.SZ', 20220101, 3, 2],
+    df2 = pd.DataFrame(np.array([['000001.SZ', 20220105, 3, 2],
                                  ['000001.SZ', 20220102, 1, 2],
-                                 ['000001.SZ', 20220105, 1, 5],
+                                 ['000001.SZ', 20220101, 1, 5],
                                  ]), columns=['code', 'ann_date', 'attr1', 'attr2'])
-    app = MapCsc('CSC_Test2')
-    # app.update_multi_data('wind', 'AShareProfitExpress', df)
+    app = MapCsc('CSC_Test')
     app.update_multi_data('wind', 'AShareProfitExpress', df)
+    app.update_multi_data('wind', 'AShareProfitExpressb', df)
     app.update_multi_data('suntime', 'fin_performance_express', df2)
 
     print(app.merge_multi_data_v2())
