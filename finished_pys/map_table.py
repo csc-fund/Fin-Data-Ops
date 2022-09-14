@@ -113,7 +113,7 @@ class MapCsc:
         # --------------要处理的数据-------------- #
         self.CSC_MERGE_TABLE = csc_merge_table  # 输入的CSC表名
         self.MULTI_MAP_TABLES = None  # 返回的CSC对应的所有表
-        self.MULTI_TABLE_DICT = {}  # 多数据源的df字典
+        self.MULTI_TABLE_DICT = self.MAP_DICT[csc_merge_table]  # 多数据源的df字典
         self.MULTI_DATE_CODE = pd.DataFrame()  # 多源数据公共的日期与股票代码
         self.CODE_DATE_COLUM = ['csc_code', 'csc_date']  # 标准化的匹配字段
         self.ALL_CODE_DATE = pd.DataFrame(columns=self.CODE_DATE_COLUM).set_index(self.CODE_DATE_COLUM)  # 用于匹配的df
@@ -133,8 +133,12 @@ class MapCsc:
         return self.MULTI_MAP_TABLES
 
     # 从外部更新多源数据
-    def update_multi_data(self, df_dict: dict):
-        self.MULTI_TABLE_DICT.update(df_dict)
+    def update_multi_data(self, db, table_name, df):
+        self.MULTI_TABLE_DICT[db][table_name].update({'table_df': df})
+
+    # 初始化MULTI_TABLE_DICT
+    def init_multi_data(self, MULTI_TABLE_DICT: dict):
+        self.MULTI_TABLE_DICT = MULTI_TABLE_DICT
 
     # 合并多源数据
     def merge_multi_data(self) -> pd.DataFrame:
@@ -160,23 +164,35 @@ class MapCsc:
         # 保存
         return self.MULTI_DATE_CODE
 
-    # 更新MULTI_DATE_CODE
-    def update_date_code(self, MULTI_DATE_CODE: pd.DataFrame):
-        self.MULTI_DATE_CODE = MULTI_DATE_CODE
-
     # 多源数据对比
-    def check_multi_data(self):
-        # 获取所有的索引
-        self.ALL_CODE_DATE.index = self.ALL_CODE_DATE.index.append(
-            [value['table_df'].set_index([value['table_code'], value['table_date']]).index for value in
-             self.MULTI_TABLE_DICT.values()]).drop_duplicates()
+    def merge_multi_data_v2(self):
+        # for table_dict in self.MULTI_TABLE_DICT.keys():  # ki wind,suntime
+        #     for value in self.MULTI_TABLE_DICT[table_dict].values():
+        #         self.ALL_CODE_DATE.index = self.ALL_CODE_DATE.index.append(
+        #             value['table_df'].set_index([value['code_column'], value['date_column']]).index).drop_duplicates()
 
+        # 1.获取所有的索引
+        self.ALL_CODE_DATE.index = self.ALL_CODE_DATE.index.append(
+            [value['table_df'].set_index([value['code_column'], value['date_column']]).index for table_dict in
+             self.MULTI_TABLE_DICT.keys() for value in self.MULTI_TABLE_DICT[table_dict].values()]).drop_duplicates()
+
+        # 2.迭代join
+        df_joins = []  # 不同数据源
+        for table_dict in self.MULTI_TABLE_DICT.keys():  # ki wind,suntime
+            df_db = pd.DataFrame()  # 同一数据源
+            for value in self.MULTI_TABLE_DICT[table_dict].values():
+                df_table = value['table_df'].set_index([value['code_column'], value['date_column']])
+                df_join = self.ALL_CODE_DATE.join(df_table, on=self.ALL_CODE_DATE.index.names)
+                df_db = pd.concat([df_db, df_join], axis=1)  # 按顺序拼接同一数据源
+            df_joins.append(df_db)  # 不同数据源
+        df_compare = df_joins[0].compare(df_joins[1])
+        print(df_compare)
         # 迭代join
-        df_list = []
-        for value in self.MULTI_TABLE_DICT.values():
-            df_raw = value['table_df'].set_index([value['table_code'], value['table_date']])
-            df_join = self.ALL_CODE_DATE.join(df_raw, on=self.ALL_CODE_DATE.index.names)
-            df_list.append(df_join)
+        # df_list = []
+        # for value in self.MULTI_TABLE_DICT.values():
+        #     df_raw = value['table_df'].set_index([value['table_code'], value['table_date']])
+        #     df_join = self.ALL_CODE_DATE.join(df_raw, on=self.ALL_CODE_DATE.index.names)
+        #     df_list.append(df_join)
 
         # 1.按照列摆好
         # column_len = [i[5] for i in self.get_map_tables()]
@@ -188,3 +204,23 @@ class MapCsc:
         # 输出一列到csc填充
         # if not self.MULTI_MAP_TABLES:
         #     self.get_map_tables()
+
+
+df = pd.DataFrame(np.array([['000001.SZ', 20220101, 1, 0],
+                            ['000001.SZ', 20220102, 1, 0],
+                            ['000001.SZ', 20220103, 1, 0],
+                            ['000001.SZ', 20220104, 1, 0],
+                            ['000001.SZ', 20220105, 1, 0],
+                            ]), columns=['code', 'ann_date', 'attr1', 'attr2'])
+df2 = pd.DataFrame(np.array([['000001.SZ', 20220101, 1, 0, 0, 0],
+                             ['000001.SZ', 20220102, 1, 0, 0, 1],
+                             ['000001.SZ', 20220103, 1, 0, 0, 1],
+                             ['000001.SZ', 20220104, 1, 0, 0, 1],
+                             ['000001.SZ', 20220105, 1, 0, 0, 1],
+                             ]), columns=['code', 'ann_date', 'attr1', 'attr2', 'attr3', 'attr4'])
+app = MapCsc('CSC_Test')
+app.update_multi_data('wind', 'AShareProfitExpress', df)
+app.update_multi_data('wind', 'AShareProfitExpressb', df)
+app.update_multi_data('suntime', 'fin_performance_express', df2)
+
+app.merge_multi_data_v2()

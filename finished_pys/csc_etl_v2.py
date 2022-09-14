@@ -90,15 +90,19 @@ def csc_database_etl():
 
     # 合并->数据合并
     @task(on_failure_callback=task_failure_alert)
-    def merge_csc(MERGE_TABLE: str, MULTI_DF_DICT: dict):
+    def merge_csc(MERGE_TABLE: str, MULTI_TABLE_DICT: dict):
         app = MapCsc(MERGE_TABLE)
-        app.update_multi_data(MULTI_DF_DICT)
-        return {'table_name': MERGE_TABLE, 'df_value': app.merge_multi_data()}  # 传递到下一个子任务
+        app.init_multi_data(MULTI_TABLE_DICT)
+        app.merge_multi_data_v2()
+
+        # return {'table_name': MERGE_TABLE, 'df_value': app.merge_multi_data()}  # 传递到下一个子任务
 
     @task  # 检查-> 合并后的信息检查
     def check_merge(df_dict: dict):
-        app = MapCsc(df_dict['table_name'])
-        app.update_date_code(df_dict['df_value'])
+        pass
+
+    # app = MapCsc(df_dict['table_name'])
+    # app.update_date_code(df_dict['df_value'])
 
     # [START main_flow]  API 2.0 会根据任务流调用自动生成依赖项,不需要定义依赖
     def start_tasks(csc_merge_table):  # 按照规则运行所有任务流
@@ -112,12 +116,15 @@ def csc_database_etl():
                     extract_sql.override(task_id='E_' + last_name)(
                         i[0], i[1], i[2], i[3], 20210101, 20230101)))['df_value']
             # 更新数据
-            MAP.update_multi_data(
-                {i[1]: {'table_df': table_df, 'table_db': i[0].split('_')[0], 'table_name': i[1], 'table_date': i[3],
-                        'table_code': i[4]}})
+            # MAP.MULTI_TABLE_DICT[i[0].split('_')[0]] = {}
+            MAP.update_multi_data(i[0].split('_')[0], i[1], table_df)
+            #
+            # {i[0].split('_')[0]: {'table_df': table_df, 'table_db': i[0].split('_')[0], 'table_name': i[1],
+            #                       'table_date': i[3],
+            #                       'table_code': i[4]}})
         # 2.生成合并表
-        # load_feather.override(task_id='L_' + csc_merge_table)(
-        #     merge_csc.override(task_id='M_' + csc_merge_table)(csc_merge_table, MAP.MULTI_DF_DICT))
+        load_feather.override(task_id='L_' + csc_merge_table)(
+            merge_csc.override(task_id='M_' + csc_merge_table)(csc_merge_table, MAP.MULTI_TABLE_DICT))
         # 3.检查数据准确性
 
     # 多进程异步执行,submit()中填写函数和形参
