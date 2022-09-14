@@ -113,8 +113,10 @@ class MapCsc:
         # --------------要处理的数据-------------- #
         self.CSC_MERGE_TABLE = csc_merge_table  # 输入的CSC表名
         self.MULTI_MAP_TABLES = None  # 返回的CSC对应的所有表
-        self.MULTI_DF_DICT = {}  # 多数据源的df字典
+        self.MULTI_TABLE_DICT = {}  # 多数据源的df字典
         self.MULTI_DATE_CODE = pd.DataFrame()  # 多源数据公共的日期与股票代码
+        self.CODE_DATE_COLUM = ['csc_code', 'csc_date']  # 标准化的匹配字段
+        self.ALL_CODE_DATE = pd.DataFrame(columns=self.CODE_DATE_COLUM).set_index(self.CODE_DATE_COLUM)  # 用于匹配的df
 
     # 返回映射的表
     def get_map_tables(self) -> list:
@@ -132,7 +134,7 @@ class MapCsc:
 
     # 从外部更新多源数据
     def update_multi_data(self, df_dict: dict):
-        self.MULTI_DF_DICT.update(df_dict)
+        self.MULTI_TABLE_DICT.update(df_dict)
 
     # 合并多源数据
     def merge_multi_data(self) -> pd.DataFrame:
@@ -140,13 +142,13 @@ class MapCsc:
         df_date_code = [
             i['table_df'].loc[:, [i['table_code'], i['table_date']]].rename(
                 columns={i['table_code']: 'csc_code', i['table_date']: 'csc_date'})
-            for i in self.MULTI_DF_DICT.values()]
+            for i in self.MULTI_TABLE_DICT.values()]
 
         # 拼起来,并去掉code和date完全一样的行,得到面板数据的标识列
         self.MULTI_DATE_CODE = pd.concat([i for i in df_date_code], axis=0).drop_duplicates()
 
         # 合并所有字段
-        for value in self.MULTI_DF_DICT.values():
+        for value in self.MULTI_TABLE_DICT.values():
             pre_name = value['table_db'] + '_' + value['table_name'] + '_'  # 重命名,数据来源+字段名
             self.MULTI_DATE_CODE = pd.merge(left=self.MULTI_DATE_CODE, right=value['table_df'].rename(
                 columns={i: pre_name + i for i in value['table_df'].columns}), how='left',
@@ -164,12 +166,24 @@ class MapCsc:
 
     # 多源数据对比
     def check_multi_data(self):
+        # 获取所有的索引
+        self.ALL_CODE_DATE.index = self.ALL_CODE_DATE.index.append(
+            [value['table_df'].set_index([value['table_code'], value['table_date']]).index for value in
+             self.MULTI_TABLE_DICT.values()]).drop_duplicates()
+
+        # 迭代join
+        df_list = []
+        for value in self.MULTI_TABLE_DICT.values():
+            df_raw = value['table_df'].set_index([value['table_code'], value['table_date']])
+            df_join = self.ALL_CODE_DATE.join(df_raw, on=self.ALL_CODE_DATE.index.names)
+            df_list.append(df_join)
+
         # 1.按照列摆好
-        column_len = [i[5] for i in self.get_map_tables()]
+        # column_len = [i[5] for i in self.get_map_tables()]
 
         # 按距离跳过对比
         # 1.三者一样不用管
-        self.MULTI_DATE_CODE.iloc[:, 0:2] = 1
+        # self.MULTI_DATE_CODE.iloc[:, 0:2] = 1
 
         # 输出一列到csc填充
         # if not self.MULTI_MAP_TABLES:
