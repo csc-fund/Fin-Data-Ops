@@ -93,9 +93,7 @@ def csc_database_etl():
     def merge_csc(MERGE_TABLE: str, MULTI_TABLE_DICT: dict):
         app = MapCsc(MERGE_TABLE)
         app.init_multi_data(MULTI_TABLE_DICT)
-        app.merge_multi_data_v2()
-
-        # return {'table_name': MERGE_TABLE, 'df_value': app.merge_multi_data()}  # 传递到下一个子任务
+        return {'table_name': MERGE_TABLE, 'df_value': app.merge_multi_data_v2()}  # 传递到下一个子任务
 
     @task  # 检查-> 合并后的信息检查
     def check_merge(df_dict: dict):
@@ -116,7 +114,6 @@ def csc_database_etl():
                     extract_sql.override(task_id='E_' + last_name)(
                         i[0], i[1], i[2], i[3], 20210101, 20230101)))['df_value']
             # 更新数据
-            # MAP.MULTI_TABLE_DICT[i[0].split('_')[0]] = {}
             MAP.update_multi_data(i[0].split('_')[0], i[1], table_df)
             #
             # {i[0].split('_')[0]: {'table_df': table_df, 'table_db': i[0].split('_')[0], 'table_name': i[1],
