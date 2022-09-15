@@ -8,7 +8,7 @@ import json
 import collections
 
 
-def update_map_dict():
+def update_map_dict() -> dict:
     """
     从映射表获取映射关系,并用数据字典里面返回对应的字段更新映射字典
     :return:
@@ -41,7 +41,6 @@ def update_map_dict():
 
     for csc_table in MAP_DICT.keys():
         get_same_column(csc_table)
-        print(csc_table)
 
     return MAP_DICT
 
@@ -54,12 +53,8 @@ def get_table_columns(table_name: str) -> dict:
     """
     with open('table_dict/' + table_name + '.json') as f:  # 去数据字典文件中寻找
         DATA_DICT = json.load(f)
-    try:
-        s = {i['fieldChsName']: i['fieldName'] for i in DATA_DICT['fieldData']}
-    except TypeError:
-        print(table_name)
-        print([i for i in DATA_DICT['fieldData']])
     return {i['fieldChsName']: i['fieldName'] for i in DATA_DICT['fieldData']}
 
 
-update_map_dict()
+with open('map_tables.json', 'w') as json_file:
+    json_file.write(json.dumps(update_map_dict()))
