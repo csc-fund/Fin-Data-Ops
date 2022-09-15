@@ -1,0 +1,237 @@
+{
+  "CSC_Balance_Sheet": {
+    "wind": {
+      "AShareBalanceSheet": {
+        "target_column": [
+          "*"
+        ],
+        "index_column": [
+          "stock_code",
+          "stock_name",
+          "report_type"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "fin_balance_sheet_gen": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_CashFlow": {
+    "wind": {
+      "AShareCashFlow": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "fin_cash_flow_gen": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Income": {
+    "wind": {
+      "AShareIncome": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "fin_income_gen": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Prices": {
+    "wind": {
+      "AShareEODPrices": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "qt_stk_daily": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Derivative": {
+    "wind": {
+      "AShareEODDerivativeIndicator": {
+        "target_column": [
+          "s_val_mv"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "qt_stk_daily": {
+        "target_column": [
+          "tcap"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Dividend": {
+    "wind": {
+      "AShareDividend": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      },
+      "AShareEXRightDividendRecord": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "bas_stk_hisdistribution": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Profit_Notice": {
+    "wind": {
+      "AShareProfitNotice": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "fin_performance_forecast": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Profit_Express": {
+    "wind": {
+      "AShareProfitExpress": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "fin_performance_express": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Test": {
+    "wind": {
+      "AShareProfitExpress": {
+        "target_column": [
+          "*"
+        ],
+        "index_column": [
+          "code",
+          "ann_date"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      },
+      "AShareProfitExpressb": {
+        "target_column": [
+          "*"
+        ],
+        "index_column": [
+          "code",
+          "ann_date"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "fin_performance_express": {
+        "target_column": [
+          "*"
+        ],
+        "index_column": [
+          "code",
+          "ann_date"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  },
+  "CSC_Test2": {
+    "wind": {
+      "AShareProfitExpressb": {
+        "target_column": [
+          "*"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    },
+    "suntime": {
+      "fin_performance_expressb": {
+        "target_column": [
+          "*"
+        ],
+        "index_column": [
+          "code",
+          "ann_date"
+        ],
+        "date_column": "ann_date",
+        "code_column": "code"
+      }
+    }
+  }
+}

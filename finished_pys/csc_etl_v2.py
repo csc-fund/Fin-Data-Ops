@@ -115,7 +115,7 @@ def csc_database_etl():
 
         # 2.生成合并表
         load_feather.override(task_id='L_' + csc_merge_table)(
-            merge_csc.override(task_id='M_' + csc_merge_table)(csc_merge_table, MAP.MULTI_TABLE_DICT))
+            merge_csc.override(task_id='M_' + csc_merge_table)(csc_merge_table, MAP.MULTI_DB_DICT))
         # 3.检查数据准确性
 
     # 多进程异步执行,submit()中填写函数和形参
