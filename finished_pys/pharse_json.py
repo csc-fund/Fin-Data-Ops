@@ -8,36 +8,42 @@ import json
 import collections
 
 
-def update_map_dict(merge_table='CSC_Balance_Sheet'):
+def update_map_dict():
     """
     从映射表获取映射关系,并用数据字典里面返回对应的字段更新映射字典
-    :param merge_table: 用于合并的表名
     :return:
     """
     map_dict_path = 'map_dict.json'  # 字典文件所在的目录
     with open(map_dict_path) as f:
         MAP_DICT = json.load(f)  # 静态的字典文件
 
-    # 取出所有的数据库和表名
-    multi_dbs = list(MAP_DICT[merge_table].keys())
-    multi_tables = [list(i.keys()) for i in list(MAP_DICT[merge_table].values())]
-    # 相同字段字典
-    all_db_column = []
-    same_ch_column = []
-    for db in list(MAP_DICT[merge_table].keys()):  # 遍历数据源
-        column_dicts = list(map(lambda x: get_table_columns(x), MAP_DICT[merge_table][db]))  # 得到字段字典
-        all_db_column += [column_dicts]
-        same_ch_column += set([j for i in column_dicts for j in list(i.keys())])  # 合并同一数据源字段+去重
-    same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]
+    def get_same_column(merge_table):
+        # 取出所有的数据库和表名
+        multi_dbs = list(MAP_DICT[merge_table].keys())
+        multi_tables = [list(i.keys()) for i in list(MAP_DICT[merge_table].values())]
+        # 相同字段字典
+        all_db_column = []
+        same_ch_column = []
+        for db in list(MAP_DICT[merge_table].keys()):  # 遍历数据源
+            column_dicts = list(map(lambda x: get_table_columns(x), MAP_DICT[merge_table][db]))  # 得到字段字典
+            all_db_column += [column_dicts]
+            same_ch_column += set([j for i in column_dicts for j in list(i.keys())])  # 合并同一数据源字段+去重
+        same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]
 
-    # 删除非共有的
-    _ = [all_db_column[i][j].pop(k) for i, db_list in enumerate(all_db_column) for j, column_dict in enumerate(db_list)
-         for k in list(column_dict.keys()) if k not in same_ch_column]
+        # 删除非共有的
+        _ = [all_db_column[i][j].pop(k) for i, db_list in enumerate(all_db_column) for j, column_dict in
+             enumerate(db_list)
+             for k in list(column_dict.keys()) if k not in same_ch_column]
 
-    # 映射回去
-    _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update({'target_column': list(n.values())}) for i, j in
-         enumerate(all_db_column) for m, n in enumerate(j)]
-    print(MAP_DICT[merge_table])
+        # 映射回去
+        _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update({'target_column': list(n.values())}) for
+             i, j in enumerate(all_db_column) for m, n in enumerate(j)]
+
+    for csc_table in MAP_DICT.keys():
+        get_same_column(csc_table)
+        print(csc_table)
+
+    return MAP_DICT
 
 
 def get_table_columns(table_name: str) -> dict:
@@ -48,4 +54,12 @@ def get_table_columns(table_name: str) -> dict:
     """
     with open('table_dict/' + table_name + '.json') as f:  # 去数据字典文件中寻找
         DATA_DICT = json.load(f)
+    try:
+        s = {i['fieldChsName']: i['fieldName'] for i in DATA_DICT['fieldData']}
+    except TypeError:
+        print(table_name)
+        print([i for i in DATA_DICT['fieldData']])
     return {i['fieldChsName']: i['fieldName'] for i in DATA_DICT['fieldData']}
+
+
+update_map_dict()

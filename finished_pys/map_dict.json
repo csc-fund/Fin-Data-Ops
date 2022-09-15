@@ -26,7 +26,7 @@
   },
   "CSC_CashFlow": {
     "wind": {
-      "AShareCashFlow": {
+      "ASHARECASHFLOW": {
         "target_column": [
           "*"
         ],
@@ -35,7 +35,7 @@
       }
     },
     "suntime": {
-      "fin_cash_flow_gen": {
+      "FIN_CASH_FLOW_GEN": {
         "target_column": [
           "*"
         ],
@@ -46,7 +46,7 @@
   },
   "CSC_Income": {
     "wind": {
-      "AShareIncome": {
+      "ASHAREINCOME": {
         "target_column": [
           "*"
         ],
@@ -55,7 +55,7 @@
       }
     },
     "suntime": {
-      "fin_income_gen": {
+      "FIN_INCOME_GEN": {
         "target_column": [
           "*"
         ],
@@ -66,7 +66,7 @@
   },
   "CSC_Prices": {
     "wind": {
-      "AShareEODPrices": {
+      "ASHAREEODPRICES": {
         "target_column": [
           "*"
         ],
@@ -75,7 +75,7 @@
       }
     },
     "suntime": {
-      "qt_stk_daily": {
+      "QT_STK_DAILY": {
         "target_column": [
           "*"
         ],
@@ -86,7 +86,7 @@
   },
   "CSC_Derivative": {
     "wind": {
-      "AShareEODDerivativeIndicator": {
+      "ASHAREEODDERIVATIVEINDICATOR": {
         "target_column": [
           "s_val_mv"
         ],
@@ -95,7 +95,7 @@
       }
     },
     "suntime": {
-      "qt_stk_daily": {
+      "QT_STK_DAILY": {
         "target_column": [
           "tcap"
         ],
@@ -133,7 +133,7 @@
   },
   "CSC_Profit_Notice": {
     "wind": {
-      "AShareProfitNotice": {
+      "ASHAREPROFITNOTICE": {
         "target_column": [
           "*"
         ],
@@ -142,7 +142,7 @@
       }
     },
     "suntime": {
-      "fin_performance_forecast": {
+      "FIN_PERFORMANCE_FORECAST": {
         "target_column": [
           "*"
         ],
@@ -153,7 +153,7 @@
   },
   "CSC_Profit_Express": {
     "wind": {
-      "AShareProfitExpress": {
+      "ASHAREPROFITEXPRESS": {
         "target_column": [
           "*"
         ],
@@ -162,76 +162,9 @@
       }
     },
     "suntime": {
-      "fin_performance_express": {
+      "FIN_PERFORMANCE_EXPRESS": {
         "target_column": [
           "*"
-        ],
-        "date_column": "ann_date",
-        "code_column": "code"
-      }
-    }
-  },
-  "CSC_Test": {
-    "wind": {
-      "AShareProfitExpress": {
-        "target_column": [
-          "*"
-        ],
-        "index_column": [
-          "code",
-          "ann_date"
-        ],
-        "date_column": "ann_date",
-        "code_column": "code"
-      },
-      "AShareProfitExpressb": {
-        "target_column": [
-          "*"
-        ],
-        "index_column": [
-          "code",
-          "ann_date"
-        ],
-        "date_column": "ann_date",
-        "code_column": "code"
-      }
-    },
-    "suntime": {
-      "fin_performance_express": {
-        "target_column": [
-          "*"
-        ],
-        "index_column": [
-          "code",
-          "ann_date"
-        ],
-        "date_column": "ann_date",
-        "code_column": "code"
-      }
-    }
-  },
-  "CSC_Test2": {
-    "wind": {
-      "AShareProfitExpressb": {
-        "target_column": [
-          "*"
-        ],
-        "index_column": [
-          "code",
-          "ann_date"
-        ],
-        "date_column": "ann_date",
-        "code_column": "code"
-      }
-    },
-    "suntime": {
-      "fin_performance_expressb": {
-        "target_column": [
-          "*"
-        ],
-        "index_column": [
-          "code",
-          "ann_date"
         ],
         "date_column": "ann_date",
         "code_column": "code"
