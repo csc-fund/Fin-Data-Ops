@@ -1,7 +1,7 @@
 {
   "CSC_Balance_Sheet": {
     "wind": {
-      "AShareBalanceSheet": {
+      "ASHAREBALANCESHEET": {
         "target_column": [
           "*"
         ],
@@ -15,7 +15,7 @@
       }
     },
     "suntime": {
-      "fin_balance_sheet_gen": {
+      "FIN_BALANCE_SHEET_GEN": {
         "target_column": [
           "*"
         ],
@@ -106,14 +106,14 @@
   },
   "CSC_Dividend": {
     "wind": {
-      "AShareDividend": {
+      "ASHAREDIVIDEND": {
         "target_column": [
           "*"
         ],
         "date_column": "ann_date",
         "code_column": "code"
       },
-      "AShareEXRightDividendRecord": {
+      "ASHAREEXRIGHTDIVIDENDRECORD": {
         "target_column": [
           "*"
         ],
@@ -122,7 +122,7 @@
       }
     },
     "suntime": {
-      "bas_stk_hisdistribution": {
+      "BAS_STK_HISDISTRIBUTION": {
         "target_column": [
           "*"
         ],
@@ -215,6 +215,10 @@
       "AShareProfitExpressb": {
         "target_column": [
           "*"
+        ],
+        "index_column": [
+          "code",
+          "ann_date"
         ],
         "date_column": "ann_date",
         "code_column": "code"

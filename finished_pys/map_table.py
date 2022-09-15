@@ -15,7 +15,7 @@ import json
 # AirFlow连接器的名称
 AF_CONN = '_af_connector'
 # 人工定义的数据映射字典
-DICT_PATH = 'map_dict.json'
+DICT_PATH = '/Users/mac/PycharmProjects/My-Air-Flow/finished_pys/map_dict.json'
 
 
 # 多源数据处理的类
@@ -34,7 +34,7 @@ class MapCsc:
         self.INDEX_DF = None  # 用于匹配的df
         self.ATTR_COLUMN = []  # 合并后新的字段名
 
-    # 返回映射的表
+    # 返回映射的表,格式化为SQL语句
     def get_map_tables(self) -> list:
         """
         :return:[( connector_id, table_name, column, date_column,code_column,column_len ),...]
@@ -103,8 +103,8 @@ class MapCsc:
             df_joins.append(df_db)  # 不同数据源
 
         # 3.对比 - 只做了2个的,如果要做2个以上的需要自己写一个对比+合并函数
-
-        self.ATTR_COLUMN = [f'attr{i}' for i in range(len(df_joins[0].columns))]
+        self.ATTR_COLUMN = [i for i in df_joins[0].columns]  # 把wind的作为参考源
+        # print( df_joins[0], df_joins[1])
         df_joins[0].set_axis(self.ATTR_COLUMN, axis=1, inplace=True)
         df_joins[1].set_axis(self.ATTR_COLUMN, axis=1, inplace=True)
         df_compare = df_joins[0].compare(df_joins[1], keep_shape=True, keep_equal=True)
@@ -115,20 +115,24 @@ class MapCsc:
 
 
 def demo():
-    df = pd.DataFrame(np.array([['000001.SZ', 20220105, 1, ],
-                                ['000001.SZ', 20220104, 1, ],
-                                ['000001.SZ', 20220101, 1, ],
-                                ]), columns=['code', 'ann_date', 'attr1', ])
-    df2 = pd.DataFrame(np.array([['000001.SZ', 20220105, 3, 2],
+    df1 = pd.DataFrame(np.array([['000001.SZ', 20220105, 1, ],
+                                 ['000001.SZ', 20220104, 1, ],
+                                 ['000001.SZ', 20220101, 1, ],
+                                 ]), columns=['code', 'ann_date', 'attr1', ])
+    df2 = pd.DataFrame(np.array([['000001.SZ', 20220105, 1, ],
+                                 ['000001.SZ', 20220104, 1, ],
+                                 ['000001.SZ', 20220101, 1, ],
+                                 ]), columns=['code', 'ann_date', 'attr2', ])
+    df3 = pd.DataFrame(np.array([['000001.SZ', 20220105, 3, 2],
                                  ['000001.SZ', 20220102, 1, 2],
                                  ['000001.SZ', 20220101, 1, 5],
                                  ]), columns=['code', 'ann_date', 'attr1', 'attr2'])
     app = MapCsc('CSC_Test')
-    app.update_multi_data('wind', 'AShareProfitExpress', df)
-    app.update_multi_data('wind', 'AShareProfitExpressb', df)
-    app.update_multi_data('suntime', 'fin_performance_express', df2)
+    app.update_multi_data('wind', 'AShareProfitExpress', df1)
+    app.update_multi_data('wind', 'AShareProfitExpressb', df2)
+    app.update_multi_data('suntime', 'fin_performance_express', df3)
 
     print(app.merge_multi_data_v2())
 
 
-demo()
+# demo()
