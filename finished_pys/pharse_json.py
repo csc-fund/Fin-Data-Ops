@@ -42,8 +42,7 @@ def update_map_dict() -> dict:
         _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update({'target_column': list(n.values())})
              for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
 
-    for csc_table in MAP_DICT.keys():
-        get_same_column(csc_table)
+    _ = [get_same_column(csc_table) for csc_table in MAP_DICT.keys()]
 
     return MAP_DICT
 
@@ -59,5 +58,6 @@ def get_table_columns(table_name: str) -> dict:
     return {i['fieldChsName']: i['fieldName'] for i in DATA_DICT['fieldData']}
 
 
-with open('map_tables.json', 'w') as json_file:
-    json_file.write(json.dumps(update_map_dict()))
+print(update_map_dict())
+# with open('map_tables.json', 'w') as json_file:
+#     json_file.write(json.dumps(update_map_dict()))
