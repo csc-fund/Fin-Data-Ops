@@ -27,6 +27,7 @@ def update_map_dict(same_chn_flag=False) -> dict:
         multi_tables = [list(i.keys()) for i in list(MAP_DICT[merge_table].values())]
         all_db_column = []  # 每个表全部字段
         same_ch_column = []  # 多数据源相同˙中文名字段
+
         #
 
         for db in MAP_DICT[merge_table].keys():  # 遍历数据源
