@@ -107,6 +107,12 @@ def update_map_dict(same_chn_flag=False) -> dict:
              'date_column': list(n.values())[1], 'index_column': [list(n.values())[0], list(n.values())[1]]
              }) for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
 
+        # 特殊的映射规则
+        if merge_table in ['CSC_Balance_Sheet', 'CSC_CashFlow', 'CSC_Income']:
+            _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update(
+                {'index_column': [list(n.values())[0], list(n.values())[3], list(n.values())[1]]
+                 }) for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
+
     # 迭代所有的表
     # _ = [update_target_column(csc_table) for csc_table in ['CSC_Derivative', ]]
     _ = [update_target_column(csc_table) for csc_table in MAP_DICT.keys()]

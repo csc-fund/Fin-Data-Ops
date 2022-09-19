@@ -77,6 +77,7 @@
         ],
         "index_column": [
           "WIND_CODE",
+          "STATEMENT_TYPE",
           "ANN_DT"
         ],
         "date_column": "ANN_DT",
@@ -308,6 +309,7 @@
         ],
         "index_column": [
           "stock_code",
+          "report_type",
           "report_year"
         ]
       }
@@ -388,6 +390,7 @@
         ],
         "index_column": [
           "WIND_CODE",
+          "STATEMENT_TYPE",
           "ANN_DT"
         ]
       }
@@ -466,6 +469,7 @@
         ],
         "index_column": [
           "stock_code",
+          "report_type",
           "report_year"
         ]
       }
@@ -516,6 +520,7 @@
         ],
         "index_column": [
           "WIND_CODE",
+          "STATEMENT_TYPE",
           "ANN_DT"
         ]
       }
@@ -564,6 +569,7 @@
         ],
         "index_column": [
           "stock_code",
+          "report_type",
           "report_year"
         ]
       }
