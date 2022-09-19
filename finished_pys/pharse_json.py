@@ -29,13 +29,12 @@ def update_map_dict(same_chn_flag=False) -> dict:
         same_ch_column = []  # 多数据源相同˙中文名字段
 
         #
-
         for db in MAP_DICT[merge_table].keys():  # 遍历数据源
             column_dicts = list(map(lambda x: get_table_columns(x), MAP_DICT[merge_table][db]))  # 得到字段字典
             all_db_column += [column_dicts]
             same_ch_column += [j for i in column_dicts for j in i.keys()]  # 合并同一数据源字段
         same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]  # 选择共同字段
-        print(same_ch_column)
+
         # 日期,代码等索引列
         for i, db_list in enumerate(all_db_column):
             for j, column_dict in enumerate(db_list):
