@@ -8,7 +8,7 @@ import json
 import collections
 
 
-def update_map_dict() -> dict:
+def update_map_dict(same_chn_flag=False) -> dict:
     """
     从映射表获取映射关系,并用数据字典里面返回对应的字段更新映射字典
     :return:
@@ -27,16 +27,34 @@ def update_map_dict() -> dict:
         multi_tables = [list(i.keys()) for i in list(MAP_DICT[merge_table].values())]
         all_db_column = []  # 每个表全部字段
         same_ch_column = []  # 多数据源相同˙中文名字段
+        #
 
         for db in MAP_DICT[merge_table].keys():  # 遍历数据源
             column_dicts = list(map(lambda x: get_table_columns(x), MAP_DICT[merge_table][db]))  # 得到字段字典
             all_db_column += [column_dicts]
-            same_ch_column += set([j for i in column_dicts for j in i.keys()])  # 合并同一数据源字段+去重
-        same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]
+            same_ch_column += [j for i in column_dicts for j in i.keys()]  # 合并同一数据源字段
+        same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]  # 选择共同字段
+        print(same_ch_column)
+        # 日期,代码等索引列
+        for i, db_list in enumerate(all_db_column):
+            for j, column_dict in enumerate(db_list):
+                for k in list(column_dict.keys()):
+                    # if '代码' in str(k):
+                    #     print('合并表', merge_table, '数据源', i, '表', j, '字段', k, )
+                    if ('股票代码' in k) | ('Wind代码' in k):
+                        pass
+                        # print('合并表', merge_table, '数据源', i, '表', j, '字段', k, )
+                    # else:
+                    #     print('no',merge_table)
 
         # 删除非共有的
-        _ = [all_db_column[i][j].pop(k) for i, db_list in enumerate(all_db_column) for j, column_dict in
-             enumerate(db_list) for k in list(column_dict.keys()) if k not in same_ch_column]
+        if same_chn_flag:
+            same_ch_column += ['股票代码', 'Wind代码']  # 自定义的全局相同列
+            same_ch_column += []  # 自定义的部分表的相同列2
+            print(same_ch_column)
+            _ = [all_db_column[i][j].pop(k) for i, db_list in enumerate(all_db_column) for j, column_dict in
+                 enumerate(db_list) for k in list(column_dict.keys()) if k not in same_ch_column]
+
         # 映射回去
         _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update(
             {'target_chn': list(n.keys()), 'target_column': list(n.values())})
@@ -60,7 +78,6 @@ def get_table_columns(table_name: str) -> dict:
 
 
 # res = update_map_dict()
-# print(res)
-print(update_map_dict())
+# print(update_map_dict())
 with open('map_tables.json', 'w') as json_file:
-    json_file.write(json.dumps(update_map_dict(), ensure_ascii=False))
+    json_file.write(json.dumps(update_map_dict(False), ensure_ascii=False))
