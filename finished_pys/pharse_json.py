@@ -18,6 +18,10 @@ def update_map_dict() -> dict:
         MAP_DICT = json.load(f)  # 静态的字典文件
 
     def get_same_column(merge_table):
+        """
+        从数据字典json文件获取相同中文字段
+        :param merge_table:
+        """
         # 取出所有的数据库和表名
         multi_dbs = list(MAP_DICT[merge_table].keys())
         multi_tables = [list(i.keys()) for i in list(MAP_DICT[merge_table].values())]
@@ -32,12 +36,11 @@ def update_map_dict() -> dict:
 
         # 删除非共有的
         _ = [all_db_column[i][j].pop(k) for i, db_list in enumerate(all_db_column) for j, column_dict in
-             enumerate(db_list)
-             for k in list(column_dict.keys()) if k not in same_ch_column]
+             enumerate(db_list) for k in list(column_dict.keys()) if k not in same_ch_column]
 
         # 映射回去
-        _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update({'target_column': list(n.values())}) for
-             i, j in enumerate(all_db_column) for m, n in enumerate(j)]
+        _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update({'target_column': list(n.values())})
+             for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
 
     for csc_table in MAP_DICT.keys():
         get_same_column(csc_table)
