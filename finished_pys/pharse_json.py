@@ -75,15 +75,22 @@ def update_map_dict(same_chn_flag=False) -> dict:
                     other_column = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
                                     k in other}
                     # 求交集,更新
+                    # 这儿的顺序不对
                     if merge_table in ['CSC_Prices', ]:
                         all_same = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
                                     k.split('(')[0] in same_ch_column}
                     else:
                         all_same = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
                                     k in same_ch_column}
+                    # 排序
+                    all_same_sort = {}
+                    for ch in same_ch_column:
+                        if ch in all_db_column[i][j].keys():
+                            all_same_sort.update({ch: all_db_column[i][j][ch]})
+                            # print(all_db_column[i][j][ch])
 
                     code_column.update(date_column)
-                    code_column.update(all_same)
+                    code_column.update(all_same_sort)
                     code_column.update(other_column)
                     all_db_column[i][j] = code_column
                     # print(table_list)
