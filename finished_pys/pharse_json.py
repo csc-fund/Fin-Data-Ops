@@ -17,7 +17,7 @@ def update_map_dict() -> dict:
     with open(map_dict_path) as f:
         MAP_DICT = json.load(f)  # 静态的字典文件
 
-    def get_same_column(merge_table):
+    def update_target_column(merge_table):
         """
         从数据字典json文件获取相同中文字段
         :param merge_table:
@@ -25,24 +25,25 @@ def update_map_dict() -> dict:
         # 取出所有的数据库和表名
         multi_dbs = list(MAP_DICT[merge_table].keys())
         multi_tables = [list(i.keys()) for i in list(MAP_DICT[merge_table].values())]
-        # 相同字段字典
-        all_db_column = []
-        same_ch_column = []
-        for db in list(MAP_DICT[merge_table].keys()):  # 遍历数据源
+        all_db_column = []  # 每个表全部字段
+        same_ch_column = []  # 多数据源相同˙中文名字段
+
+        for db in MAP_DICT[merge_table].keys():  # 遍历数据源
             column_dicts = list(map(lambda x: get_table_columns(x), MAP_DICT[merge_table][db]))  # 得到字段字典
             all_db_column += [column_dicts]
-            same_ch_column += set([j for i in column_dicts for j in list(i.keys())])  # 合并同一数据源字段+去重
+            same_ch_column += set([j for i in column_dicts for j in i.keys()])  # 合并同一数据源字段+去重
         same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]
 
         # 删除非共有的
         _ = [all_db_column[i][j].pop(k) for i, db_list in enumerate(all_db_column) for j, column_dict in
              enumerate(db_list) for k in list(column_dict.keys()) if k not in same_ch_column]
-
         # 映射回去
-        _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update({'target_column': list(n.values())})
-             for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
+        _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update(
+            {'target_chn': list(n.keys()), 'target_column': list(n.values())})
+            for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
 
-    _ = [get_same_column(csc_table) for csc_table in MAP_DICT.keys()]
+    # 迭代所有的表
+    _ = [update_target_column(csc_table) for csc_table in MAP_DICT.keys()]
 
     return MAP_DICT
 
@@ -58,6 +59,8 @@ def get_table_columns(table_name: str) -> dict:
     return {i['fieldChsName']: i['fieldName'] for i in DATA_DICT['fieldData']}
 
 
+# res = update_map_dict()
+# print(res)
 print(update_map_dict())
-# with open('map_tables.json', 'w') as json_file:
-#     json_file.write(json.dumps(update_map_dict()))
+with open('map_tables.json', 'w') as json_file:
+    json_file.write(json.dumps(update_map_dict(), ensure_ascii=False))
