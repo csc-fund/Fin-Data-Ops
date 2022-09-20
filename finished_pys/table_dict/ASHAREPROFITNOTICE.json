@@ -65,7 +65,7 @@
     },
     {
       "databaseChsName": "万得",
-      "fieldChsName": "预告净利润变动幅度下限（%）",
+      "fieldChsName": "预告净利润变动幅度下限(%)",
       "fieldId": 221120,
       "fieldName": "S_PROFITNOTICE_CHANGEMIN",
       "fieldType": "NUMBER(20,4)",
@@ -75,7 +75,7 @@
     },
     {
       "databaseChsName": "万得",
-      "fieldChsName": "预告净利润变动幅度上限（%）",
+      "fieldChsName": "预告净利润变动幅度上限(%)",
       "fieldId": 221121,
       "fieldName": "S_PROFITNOTICE_CHANGEMAX",
       "fieldType": "NUMBER(20,4)",
@@ -85,7 +85,7 @@
     },
     {
       "databaseChsName": "万得",
-      "fieldChsName": "预告净利润下限（万元）",
+      "fieldChsName": "预告净利润下限(万元)",
       "fieldId": 221122,
       "fieldName": "S_PROFITNOTICE_NETPROFITMIN",
       "fieldType": "NUMBER(20,4)",
@@ -95,7 +95,7 @@
     },
     {
       "databaseChsName": "万得",
-      "fieldChsName": "预告净利润上限（万元）",
+      "fieldChsName": "预告净利润上限(万元)",
       "fieldId": 221123,
       "fieldName": "S_PROFITNOTICE_NETPROFITMAX",
       "fieldType": "NUMBER(20,4)",
