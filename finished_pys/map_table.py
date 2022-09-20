@@ -15,7 +15,7 @@ import json
 # AirFlow连接器的名称
 AF_CONN = '_af_connector'
 # 人工定义的数据映射字典
-DICT_PATH = '/Users/mac/PycharmProjects/My-Air-Flow/finished_pys/map_dict.json'
+DICT_PATH = '/Users/mac/PycharmProjects/My-Air-Flow/finished_pys/map_tables_same.json'
 
 
 # 多源数据处理的类
@@ -133,6 +133,5 @@ def demo():
     app.update_multi_data('suntime', 'fin_performance_express', df3)
 
     print(app.merge_multi_data_v2())
-
 
 # demo()
