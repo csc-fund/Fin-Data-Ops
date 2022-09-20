@@ -40,7 +40,7 @@ def update_map_dict(same_chn_flag=False) -> dict:
         if merge_table in ['CSC_Prices', ]:
             # 过滤掉括号以后再对比
             column_filter = [i.split('(')[0] for i in same_ch_column]
-        count_dict = collections.Counter(column_filter)  # 求重复值
+        count_dict = collections.Counter(column_filter)  # 统计字段出现次数
         # 取出重复值的下标
         same_ch_column = [same_ch_column[i] for i, v in enumerate(column_filter) if count_dict[v] > 1]
 
@@ -71,7 +71,6 @@ def update_map_dict(same_chn_flag=False) -> dict:
 
                     # -------------- 在same中添加,求交集并保持顺序对应-------------- #
                     if merge_table in ['CSC_aPrices', ]:
-
                         all_same_sort = {same: all_db_column[i][j][same] for same in same_ch_column if
                                          same in list(map(lambda x: x.split('(')[0], list(all_db_column[i][j].keys())))}
                     else:
