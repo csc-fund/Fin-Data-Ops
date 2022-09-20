@@ -29,18 +29,20 @@ def update_map_dict(same_chn_flag=False) -> dict:
         all_db_column = []  # 每个表全部字段
         same_ch_column = []  # 多数据源相同˙中文名字段
 
-        #
-        for db in MAP_DICT[merge_table].keys():  # 遍历数据源
+        # -------------- 遍历数据源-------------- #
+        for db in MAP_DICT[merge_table].keys():
             column_dicts = list(map(lambda x: get_table_columns(x), MAP_DICT[merge_table][db]))  # 得到字段字典
             all_db_column += [column_dicts]
             same_ch_column += list({}.fromkeys([j for i in column_dicts for j in i.keys()]).keys())  # 合并同一数据源字段
 
-        # 相同字段过滤规则
+        # -------------- 求重复字段-------------- #
+        column_filter = same_ch_column
         if merge_table in ['CSC_Prices', ]:
-            same_ch_column = [i.split('(')[0] for i in same_ch_column]
-
-        # 选择共同字段
-        same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]
+            # 过滤掉括号以后再对比
+            column_filter = [i.split('(')[0] for i in same_ch_column]
+        count_dict = collections.Counter(column_filter)  # 求重复值
+        # 取出重复值的下标
+        same_ch_column = [same_ch_column[i] for i, v in enumerate(column_filter) if count_dict[v] > 1]
 
         # 保留共有的
         if same_chn_flag:
@@ -49,7 +51,6 @@ def update_map_dict(same_chn_flag=False) -> dict:
                     # --------------自定义的全局相同列-------------- #
                     code_column = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
                                    k in ['股票代码', 'Wind代码']}
-
                     # --------------自定义日期列-------------- #
                     date = []
                     date_column = {}
@@ -69,18 +70,14 @@ def update_map_dict(same_chn_flag=False) -> dict:
                     other_column = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys()
                                     if k in other}
 
-                    # -------------- 在same中添加,求交集-------------- #
-                    if merge_table in ['CSC_Prices', ]:
-                        all_same = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
-                                    k.split('(')[0] in same_ch_column}
-                    else:
-                        all_same = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
-                                    k in same_ch_column}
+                    # -------------- 在same中添加,求交集并保持顺序对应-------------- #
+                    if merge_table in ['CSC_aPrices', ]:
 
-                    # -------------- 排序-------------- #
-                    all_same_sort = {}
-                    _ = [all_same_sort.update({same: all_db_column[i][j][same]}) for same in all_same
-                         if same in all_db_column[i][j].keys()]
+                        all_same_sort = {same: all_db_column[i][j][same] for same in same_ch_column if
+                                         same in list(map(lambda x: x.split('(')[0], list(all_db_column[i][j].keys())))}
+                    else:
+                        all_same_sort = {same: all_db_column[i][j][same] for same in same_ch_column
+                                         if same in all_db_column[i][j].keys()}
 
                     # -------------- 更新 -------------- #
                     code_column.update(date_column)
@@ -94,18 +91,19 @@ def update_map_dict(same_chn_flag=False) -> dict:
              'date_column': list(n.values())[1], 'index_column': [list(n.values())[0], list(n.values())[1]]
              }) for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
 
-        # 特殊的映射规则
+        # index_column的映射规则
         if merge_table in ['CSC_Balance_Sheet', 'CSC_CashFlow', 'CSC_Income']:
             _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update(
                 {'index_column': [list(n.values())[0], list(n.values())[3], list(n.values())[1]]
                  }) for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
 
         # 检查所有表的字段
-        _ = [print(merge_table, db, '\n', MAP_DICT[merge_table][db][table]['target_chn'])
-             for db in MAP_DICT[merge_table].keys() for table in MAP_DICT[merge_table][db]]
+        check_res = [(merge_table, db, MAP_DICT[merge_table][db][table]['target_chn'])
+                     for db in MAP_DICT[merge_table].keys() for table in MAP_DICT[merge_table][db]]
+        print(check_res[0], '\n', check_res[1], len(check_res[0][2]), len(check_res[1][2]))
 
     # 迭代所有的表
-    _ = [update_target_column(csc_table) for csc_table in ['CSC_Profit_Notice', ]]
+    _ = [update_target_column(csc_table) for csc_table in ['CSC_Prices', ]]
     # _ = [update_target_column(csc_table) for csc_table in MAP_DICT.keys()]
 
     # 保存
