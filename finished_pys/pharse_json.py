@@ -53,15 +53,14 @@ def update_map_dict(same_chn_flag=False) -> dict:
                                    k in ['股票代码', 'Wind代码']}
                     # --------------自定义日期列-------------- #
                     date = []
-                    date_column = {}
                     if merge_table == 'CSC_Dividend':
                         date = []
                     elif merge_table in ['CSC_Balance_Sheet', 'CSC_CashFlow', 'CSC_Income', ]:
                         date = ['公告日期', '报表发布日期', '报告期', '报表年度']
                     elif merge_table in ['CSC_Profit_Notice', ]:
                         date = ['公告日期', '报告期', '预测周期']
-                    _ = [date_column.update({same: all_db_column[i][j][same]}) for same in date
-                         if same in all_db_column[i][j].keys()]
+                    date_column = {same: all_db_column[i][j][same] for same in date
+                                   if same in all_db_column[i][j].keys()}
 
                     # -------------- 自定义其他列-------------- #
                     other = ['']
@@ -103,7 +102,7 @@ def update_map_dict(same_chn_flag=False) -> dict:
         print(check_res[0], '\n', check_res[1], len(check_res[0][2]), len(check_res[1][2]))
 
     # 迭代所有的表
-    _ = [update_target_column(csc_table) for csc_table in ['CSC_Prices', ]]
+    _ = [update_target_column(csc_table) for csc_table in ['CSC_Profit_Notice', ]]
     # _ = [update_target_column(csc_table) for csc_table in MAP_DICT.keys()]
 
     # 保存
