@@ -34,8 +34,6 @@ def update_map_dict(same_chn_flag=False) -> dict:
             column_dicts = list(map(lambda x: get_table_columns(x), MAP_DICT[merge_table][db]))  # 得到字段字典
             all_db_column += [column_dicts]
             same_ch_column += list({}.fromkeys([j for i in column_dicts for j in i.keys()]).keys())  # 合并同一数据源字段
-            # print(list({}.fromkeys(same_ch_column).keys()))
-            # print(same_ch_column)
 
         # 相同字段过滤规则
         if merge_table in ['CSC_Prices', ]:
@@ -44,69 +42,51 @@ def update_map_dict(same_chn_flag=False) -> dict:
         # 选择共同字段
         same_ch_column = [k for k, v in collections.Counter(same_ch_column).items() if v > 1]
 
-        # 需要排序,不要用pop的风格
-
-        # 日期,代码等索引列
-
-        # 保留共有的,注意顺序要对应上
+        # 保留共有的
         if same_chn_flag:
-
             for i, db_list in enumerate(all_db_column):
                 for j, column_dict in enumerate(db_list):
-                    # 自定义的全局相同列
+                    # --------------自定义的全局相同列-------------- #
                     code_column = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
                                    k in ['股票代码', 'Wind代码']}
 
-                    # 自定义日期列
+                    # --------------自定义日期列-------------- #
                     date = []
+                    date_column = {}
                     if merge_table == 'CSC_Dividend':
                         date = []
-
-                    elif merge_table in ['CSC_Balance_Sheet', 'CSC_CashFlow', 'CSC_Income']:
+                    elif merge_table in ['CSC_Balance_Sheet', 'CSC_CashFlow', 'CSC_Income', ]:
                         date = ['公告日期', '报表发布日期', '报告期', '报表年度']
+                    elif merge_table in ['CSC_Profit_Notice', ]:
+                        date = ['公告日期', '报告期', '预测周期']
+                    _ = [date_column.update({same: all_db_column[i][j][same]}) for same in date
+                         if same in all_db_column[i][j].keys()]
 
-                    date_column = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
-                                   k in date}
-
-                    # 自定义其他列
+                    # -------------- 自定义其他列-------------- #
                     other = ['']
                     if merge_table == 'CSC_Derivative':
                         other = ['当日总市值', '总市值']
-                    other_column = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
-                                    k in other}
-                    # 求交集,更新
-                    # 这儿的顺序不对
+                    other_column = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys()
+                                    if k in other}
+
+                    # -------------- 在same中添加,求交集-------------- #
                     if merge_table in ['CSC_Prices', ]:
                         all_same = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
                                     k.split('(')[0] in same_ch_column}
                     else:
                         all_same = {k: all_db_column[i][j][k] for k in all_db_column[i][j].keys() if
                                     k in same_ch_column}
-                    # 排序
+
+                    # -------------- 排序-------------- #
                     all_same_sort = {}
-                    for ch in same_ch_column:
-                        if ch in all_db_column[i][j].keys():
-                            all_same_sort.update({ch: all_db_column[i][j][ch]})
-                            # print(all_db_column[i][j][ch])
+                    _ = [all_same_sort.update({same: all_db_column[i][j][same]}) for same in all_same
+                         if same in all_db_column[i][j].keys()]
 
+                    # -------------- 更新 -------------- #
                     code_column.update(date_column)
-                    code_column.update(all_same_sort)
                     code_column.update(other_column)
+                    code_column.update(all_same_sort)
                     all_db_column[i][j] = code_column
-                    # print(table_list)
-                    # print(all_db_column[i][j])
-                    # print(itemgetter(*table_list)(all_db_column[i][j]))
-                    # print([i for i in itemgetter(*table_list)(all_db_column[i][j])])
-                    # all_db_column[i][j] = itemgetter(*table_list)(all_db_column[i][j])
-                    # print(all_db_column[i][j].update({}))
-                    # for k in list(column_dict.keys()):
-                    #     if k in same_ch_column:
-                    #         print(all_db_column[i][j].get([k, k]))
-
-            # print(all_db_column)
-            # _ = [all_db_column[i][j].pop(k) for i, db_list in enumerate(all_db_column) for j, column_dict in
-            #      enumerate(db_list) for k in list(column_dict.keys()) if k not in same_ch_column]
-            # print(all_db_column[0])
 
         # 映射回去
         _ = [MAP_DICT[merge_table][multi_dbs[i]][multi_tables[i][m]].update(
@@ -120,9 +100,21 @@ def update_map_dict(same_chn_flag=False) -> dict:
                 {'index_column': [list(n.values())[0], list(n.values())[3], list(n.values())[1]]
                  }) for i, j in enumerate(all_db_column) for m, n in enumerate(j)]
 
+        # 检查所有表的字段
+        _ = [print(merge_table, db, '\n', MAP_DICT[merge_table][db][table]['target_chn'])
+             for db in MAP_DICT[merge_table].keys() for table in MAP_DICT[merge_table][db]]
+
     # 迭代所有的表
-    # _ = [update_target_column(csc_table) for csc_table in ['CSC_Derivative', ]]
-    _ = [update_target_column(csc_table) for csc_table in MAP_DICT.keys()]
+    _ = [update_target_column(csc_table) for csc_table in ['CSC_Profit_Notice', ]]
+    # _ = [update_target_column(csc_table) for csc_table in MAP_DICT.keys()]
+
+    # 保存
+    if same_chn_flag:
+        with open('map_tables_same.json', 'w') as json_file:
+            json_file.write(json.dumps(MAP_DICT, ensure_ascii=False))
+    else:
+        with open('map_tables_all.json', 'w') as json_file:
+            json_file.write(json.dumps(MAP_DICT, ensure_ascii=False))
 
     return MAP_DICT
 
@@ -140,5 +132,4 @@ def get_table_columns(table_name: str) -> dict:
 
 # res = update_map_dict()
 # print(update_map_dict())
-with open('map_tables.json', 'w') as json_file:
-    json_file.write(json.dumps(update_map_dict(True), ensure_ascii=False))
+update_map_dict(True)
