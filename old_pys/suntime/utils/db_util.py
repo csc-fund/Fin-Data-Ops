@@ -5,7 +5,7 @@ from .db_config import DB_CONFIG
 import os
 
 # os.environ["path"] =r"E:/software/instantclient_19_3;"+os.environ["path"]
-# os.environ["path"] = "E:/software/instantclient_19_3"
+# os.environ["path"] = "E:/softwarae/instantclient_19_3"
 # print(os.environ['path'])
 class DbUtil:
     def __init__(self, schema):

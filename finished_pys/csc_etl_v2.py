@@ -9,6 +9,8 @@ import pendulum
 from airflow.decorators import dag, task
 # -----------------airflow数据库接口----------------- #
 from airflow.providers.common.sql.hooks.sql import BaseHook  # 通用数据库接口
+from airflow.providers.microsoft.mssql.hooks.mssql import MsSqlHook
+
 from concurrent.futures import *  # 多进程并行
 import pandas as pd
 import numpy as np
@@ -136,4 +138,11 @@ dag = csc_database_etl()
 # airflow webserver --port 8080
 # airflow scheduler
 # airflow tasks list taskflow_api_etl  --tree
-# airflow tasks test taskflow_api_etl extract 20220906
+# airflow ta
+# sks test taskflow_api_etl extract 20220906
+# airflow users create \
+#           --username zirui \
+#           --firstname FIRST_NAME \
+#           --lastname LAST_NAME \
+#           --role Admin \
+#           --email admin@example.org

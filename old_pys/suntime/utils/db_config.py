@@ -7,11 +7,10 @@ DB_CONFIG = {
         "PASSWORD": "JJJZ"
     },
     "ZYYX_2": {
-        "IP": "109.244.74.214", # "IP": "202.0.1.178",
+        "IP": "109.244.74.214",  # "IP": "202.0.1.178",
         "PORT": "4108",
         "SERVICE_NAME": "zyyx",
         "USER_NAME": "fund_wcc",
         "PASSWORD": "fund_wcc"
     }
 }
-
